@@ -2,7 +2,7 @@
 
 反应自由能台阶图编辑器，支持多体系、反应分支、可选过渡态及文字样式调整。
 
-当前稳定版：[v0.13](./stepplot-v0.13.html)。
+当前版本：[v0.13](./stepplot-v0.13.html)。
 
 [在线使用](https://lin-yueyang.github.io/step_plot/) · [更新记录](./更新.md)
 
