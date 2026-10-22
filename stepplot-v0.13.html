@@ -1,0 +1,1764 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="stepplot-start" content="blank"><meta name="stepplot-version" content="0.13"><title>台阶图 v0.13 · STEPLOT</title>
+  <style>
+:root{--ink:#243d4c;--muted:#839097;--border:#e0e7e6;--accent:#287c77;--bg:#f4f6f5;font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);font-size:13px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg)}[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}button,select{cursor:pointer}button{border:1px solid var(--border);border-radius:6px;background:#fff;padding:7px 10px}button:hover{background:#edf4f1;border-color:#b8d1c7}button:disabled{opacity:.35;cursor:default}button:focus-visible,input:focus,select:focus,textarea:focus{outline:2px solid #69aaa3;outline-offset:1px}
+.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}.primary:hover{background:#216861;color:#fff}.icon{padding:3px 8px;font-size:18px;border-color:transparent;background:transparent}.mini{font-size:11px;padding:4px 7px}.full{width:100%}.danger{color:#b2695f}
+.topbar{min-height:56px;display:flex;align-items:center;gap:16px;padding:10px 16px;background:white;border-bottom:1px solid var(--border)}.brand{display:flex;align-items:center;gap:8px;white-space:nowrap}.brand-icon{width:30px;height:30px;background:var(--accent);color:white;border-radius:8px;display:grid;place-items:center}.brand-icon svg{width:28px;height:28px}.brand strong{font-size:20px}.brand strong span{font-size:9px;letter-spacing:1.5px;color:#8c9a9e;margin-left:4px}.version{font-size:10px;color:#81938f}.save-status{font-size:11px;color:var(--muted);white-space:nowrap}.top-actions{margin-left:auto;display:flex;align-items:center;gap:6px}.top-actions button{font-size:12px;white-space:nowrap}.separator{width:1px;height:20px;background:var(--border);margin:0 3px}
+.recovery-bar{height:34px;display:flex;align-items:center;justify-content:center;gap:12px;background:#fff7e5;padding:5px;font-size:12px;color:#8b7037}.recovery-bar button{font-size:12px;padding:3px 8px}
+.workspace{--left-width:300px;--right-width:260px;display:grid;grid-template-columns:var(--left-width) 7px minmax(320px,1fr) 7px var(--right-width);height:calc(100vh - 56px);min-height:480px}.recovery-bar:not([hidden])+.workspace{height:calc(100vh - 90px)}
+.data-panel,.inspector{background:white;display:flex;flex-direction:column;min-width:0;overflow:hidden}.panel-scroll{overflow-y:auto;flex:1;padding:14px 12px 24px;scrollbar-width:thin}.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);padding:0 8px;flex-shrink:0}.tabs button{flex:1;background:transparent;border:0;border-radius:0;padding:13px 3px;color:var(--muted);font-size:12px;white-space:nowrap}.tabs button.active{color:var(--accent);font-weight:600;border-bottom:2px solid var(--accent)}.inspector-heading{display:flex;align-items:center}.inspector-heading .tabs{flex:1}.inspector-heading>.icon{font-size:16px}
+.resize-handle{cursor:col-resize;position:relative;background:var(--bg);touch-action:none}.resize-handle:before{content:"";position:absolute;top:45%;height:42px;width:3px;left:2px;border-radius:3px;background:#cad6d1}.resize-handle:hover,.resize-handle:focus-visible{background:#d7eae3}.resizing{cursor:col-resize;user-select:none}.right-closed{grid-template-columns:var(--left-width) 7px minmax(320px,1fr) 0 0}.right-closed #right-resize,.right-closed .inspector{display:none}
+.main-panel{min-width:0;overflow:auto;padding:14px 15px}.canvas-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}.toolbar-hint{color:var(--muted);font-size:11px}.toolbar-end{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}.toolbar-end button,.toolbar-end select{font-size:11px;padding:6px 7px}.toolbar-end select{border:1px solid var(--border);border-radius:6px;background:#fff}
+.canvas-card{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden}.canvas-card-top,.canvas-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;color:var(--muted);font-size:10px}.canvas-card-top{border-bottom:1px solid #eef2f0}.canvas-card-top select{font-size:11px;border:1px solid var(--border);border-radius:4px;padding:3px 5px;background:white}.canvas-card-bottom{border-top:1px solid #eef2f0;min-height:32px}#plot-scroll{overflow:auto;padding:8px}#plot{min-height:300px;display:flex;align-items:center;justify-content:center}#plot svg{display:block;width:100%;height:auto;flex-shrink:0;touch-action:none}#plot svg [data-key]{cursor:move}#plot svg [data-node],#plot svg [data-edge]{cursor:pointer}#plot svg text{user-select:none}#plot svg .selection-ring{pointer-events:none}
+#warnings{font-size:12px;color:#9b773d;line-height:1.8;padding:10px 2px}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 11px;font-size:12px;font-weight:600}.section{border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:16px}.field{display:flex;flex-direction:column;gap:5px;margin-bottom:11px;font-size:12px;color:#6d7e81;min-width:0}.field input,.field select,.field textarea{width:100%;min-width:0;border:1px solid #dce4e1;border-radius:5px;background:white;color:var(--ink);padding:7px 8px;font-size:13px}.field textarea{resize:vertical;min-height:54px;line-height:1.5}.field input[type=color]{height:34px;padding:3px}.form-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px}.button-row{display:flex;gap:6px;margin-top:8px}.button-row button{flex:1;font-size:12px;padding:6px}.check{display:flex;gap:6px;align-items:center;font-size:12px;color:#6d7e81;margin:8px 0 12px}.check input{accent-color:var(--accent)}.format-bar{display:flex;gap:5px}.format-bar button{font-size:14px;padding:4px 12px;color:var(--accent);background:#f7faf8;min-width:43px}
+.input-mode{display:flex;align-items:center;gap:8px;margin-bottom:12px}.input-mode>.field{flex:1;display:flex;flex-direction:row;align-items:center;gap:8px;margin:0;white-space:nowrap}.input-mode select{flex:1;width:auto}.input-mode>button{white-space:nowrap}
+.system-group{border:1px solid var(--border);border-radius:7px;margin-bottom:10px;background:#fff;overflow:hidden}.system-group.active{border-color:#92b6ab}.system-row{display:flex;align-items:center;gap:6px;min-height:39px;padding:5px 8px;background:#f4f7f5;cursor:pointer}.system-row .fold{border:0;background:transparent;padding:3px;font-size:16px;color:#74958a}.system-row>input{accent-color:var(--accent);margin:0;width:13px;height:13px}.color-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}.system-row .name{flex:1;min-width:0;font-weight:600;font-size:13px;overflow-wrap:anywhere}.system-row small{font-size:10px;color:var(--muted)}.system-body{padding:8px}.system-tools{display:flex;align-items:center;gap:6px;margin-bottom:8px}.system-tools>.field{flex:1;flex-direction:row;align-items:center;white-space:nowrap;margin:0;font-size:11px;gap:7px}.system-tools select{padding:5px;font-size:12px}.system-tools>button{white-space:nowrap}
+.state-row{border:1px solid #e4e9e6;border-radius:5px;background:white;padding:7px;margin-bottom:6px;cursor:pointer}.state-row.active{border-color:#80ad9f;background:#fcfefd}.state-top{display:flex;align-items:center;gap:7px;min-height:20px}.state-index{color:#95a49d;font-size:10px;min-width:12px}.state-name{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:500}.energy-tag{font-size:12px;color:var(--accent);font-variant-numeric:tabular-nums}.state-raw{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}.energy-input{display:flex;align-items:center;border:1px solid #e0e6e3;border-radius:4px;background:#fff;overflow:hidden;min-width:0}.energy-input:focus-within{outline:2px solid #69aaa3}.energy-input input{width:100%;min-width:0;border:0;padding:5px 4px;font-size:12px;background:transparent;appearance:textfield;-moz-appearance:textfield}.energy-input input::-webkit-inner-spin-button{appearance:none}.energy-input input:focus{outline:0}.energy-input span{font-size:9px;color:#95a29d;white-space:nowrap;padding-right:4px;pointer-events:none}.state-terms{font-size:10px;line-height:1.5;color:#8b9b94;margin-top:5px}.auto-connect{margin:14px 2px 0}.pending{font-size:11px;color:#a17d43;margin-top:5px}.inline-editor{display:block;margin:0}.inline-editor input{padding:3px 5px;font-size:13px}.inline-editor .format-bar{margin-top:4px}
+.ref-card,.edge-card{border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:9px}.ref-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.ref-head strong{font-size:14px}.ref-card .field{margin-bottom:8px}.ref-card .check{font-size:11px}.edge-card{cursor:pointer;font-size:12px}.edge-card.active{border-color:#80ad9f}.edge-card small{display:block;font-size:11px;color:var(--muted);margin-top:6px}
+.term-row{display:grid;grid-template-columns:minmax(0,1fr) 65px 25px;gap:6px;align-items:end;margin-bottom:8px}.term-row label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#6d7e81}.term-row input,.term-row select{width:100%;min-width:0;border:1px solid #dce4e1;border-radius:5px;padding:6px 4px;background:#fff;font-size:12px}.term-row button{height:30px;padding:3px}.terms-editor{margin:12px 0 16px}.terms-editor details{font-size:11px;color:#6d7e81;margin:10px 0}.terms-editor summary{cursor:pointer}.terms-editor details .field{margin-top:9px}.value-box{background:#f0f6f3;border:1px solid #dce9e2;border-radius:7px;padding:11px;margin:13px 0}.value-box strong{font-size:24px;color:var(--accent);font-weight:550}.value-box small{font-size:11px;color:#82958a}.calc-row{display:flex;justify-content:space-between;gap:6px;font-size:11px;padding:5px 0;color:#7b8b83}.calc-row span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}.calc-row.total{border-top:1px solid #d4e2d9;color:var(--ink)}.empty{font-size:12px;color:var(--muted);padding:16px 4px;text-align:center}.error{font-size:12px;color:#b45b4e;line-height:1.7}.muted{font-size:11px;color:var(--muted)}sub,sup{font-size:.75em;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#285b4b;color:#fff;padding:11px 18px;border-radius:7px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:20}#toast.show{opacity:1}
+dialog{border:1px solid var(--border);border-radius:12px;padding:22px;max-width:540px;width:calc(100% - 32px);color:var(--ink);box-shadow:0 20px 80px #1233}dialog::backdrop{background:#203a4c66;backdrop-filter:blur(2px)}.dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.dialog-head h2{font-size:18px;font-weight:600;margin:0}dialog p{font-size:13px;color:var(--muted);line-height:1.7}dialog textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:11px;font-size:13px;line-height:1.8;resize:vertical;margin-bottom:12px}.dialog-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:18px}.dialog-actions button{font-size:12px}.export-options{display:flex;gap:10px;margin-bottom:20px}.export-options button{flex:1;text-align:left;padding:17px}.export-options strong{font-size:23px;display:block;margin-bottom:7px}.export-options span{font-size:11px;color:var(--muted)}
+.focus .data-panel,.focus .inspector,.focus .resize-handle{display:none}.focus .workspace{grid-template-columns:minmax(0,1fr)}.focus .main-panel{max-width:1500px;width:100%;margin:auto}.focus #plot{min-height:0}
+@media(max-width:1100px){.workspace{--left-width:280px;--right-width:240px;grid-template-columns:var(--left-width) 7px minmax(320px,1fr) 0 0}.inspector{display:none;position:fixed;right:0;top:56px;bottom:0;width:var(--right-width);z-index:5;border-left:1px solid var(--border);box-shadow:-10px 0 30px #243d4c18}.inspector.open{display:flex}#right-resize{display:none}.main-panel{padding:12px}.toolbar-hint{display:none}.save-status{display:none}.brand strong span{display:none}}
+@media(max-width:720px){.topbar{flex-wrap:wrap;gap:8px;padding:8px 10px}.top-actions{margin-left:0;width:100%;justify-content:flex-end;gap:4px}.top-actions button{font-size:11px;padding:6px}.top-actions .separator,.version{display:none}.workspace{display:flex;flex-direction:column;height:auto!important;min-height:0}.data-panel{max-height:380px;border-bottom:1px solid var(--border)}.panel-scroll{padding:12px}.resize-handle{display:none}.main-panel{padding:12px 8px}.inspector{top:0;width:290px;height:100vh}.toolbar-end{margin-left:0}#plot{min-height:240px}.focus .workspace{display:block}.recovery-bar{font-size:11px}.right-closed .inspector.open{display:flex}}
+@media(min-width:721px) and (max-width:1100px){.inspector-open #right-resize{display:block;position:fixed;right:var(--right-width);width:7px;top:56px;bottom:0;z-index:6}}
+.label-toggle{display:flex;align-items:center;gap:2px;color:#8b9c94;font-size:10px;white-space:nowrap;cursor:pointer}.label-toggle input{width:11px;height:11px;margin:0;accent-color:var(--accent)}
+.blank-state{display:flex;align-items:center;gap:8px;min-height:34px;border-style:dashed;background:#fafcfb;color:#a0ada6;font-size:12px}.blank-state>span:nth-child(2){flex:1}
+.more-actions{position:relative;flex:0 0 27px;align-self:stretch}.more-actions summary{display:grid;place-items:center;height:100%;border:1px solid var(--border);border-radius:5px;background:#fff;cursor:pointer;list-style:none}.more-actions summary::-webkit-details-marker{display:none}.more-actions[open] summary{color:var(--accent);background:#edf5f0}.more-actions>div{position:absolute;right:0;bottom:calc(100% + 5px);z-index:3;width:150px;padding:5px;border:1px solid var(--border);border-radius:6px;background:white;box-shadow:0 5px 20px #243d4c15}.more-actions button{width:100%;white-space:nowrap}
+.owner-info{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;padding:8px;background:#f1f6f3;border-radius:5px;font-size:11px;line-height:1.7;color:#739080}.owner-info>span{overflow-wrap:anywhere}
+.color-swatches{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 8px}.color-swatches>button[data-id]{width:22px;height:22px;padding:0;background:var(--swatch);border:3px solid white;box-shadow:0 0 0 1px #dce4df;border-radius:50%}.color-swatches>button[data-id]:hover{box-shadow:0 0 0 2px #8fb6a8}.system-colors{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}.system-colors button{display:flex;align-items:center;gap:5px}.system-colors button.active{border-color:#74a794;background:#eaf5ee}
+#plot svg [data-node]{cursor:grab}#plot.dragging-step,#plot.dragging-step svg [data-node]{cursor:grabbing!important}
+.energy-heading{font-weight:600;color:var(--accent);font-size:13px;padding:6px 0}.text-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 9px;margin-bottom:10px;background:#fff;border:1px solid var(--border);border-radius:7px}.text-toolbar select,.text-toolbar input{border:1px solid var(--border);border-radius:4px;background:#fff;height:30px;font-size:12px}.text-toolbar select{width:145px;padding:4px}.text-toolbar input[type=number]{width:58px;padding:4px 6px}.text-toolbar input[type=color]{width:36px;padding:2px}.text-toolbar input.mixed{opacity:.55;border-style:dashed}.text-toolbar>button{padding:5px 9px;font-size:12px;height:30px}.text-toolbar button.active{background:#e2f0e9;border-color:#76a893}.text-swatches{display:flex;gap:5px}.text-swatches button{width:17px;height:17px;border-radius:50%;background:var(--swatch);padding:0;border:2px solid #fff;box-shadow:0 0 0 1px #d9e2dd}.text-toolbar input:disabled,.text-toolbar select:disabled{opacity:.4;cursor:default}#text-count{font-size:10px;color:var(--muted);white-space:nowrap;margin-left:auto}
+.canvas-card{position:relative}#plot-scroll{height:clamp(300px,calc(100vh - 280px),820px);overflow:hidden}#plot{height:100%;width:100%;min-height:0;display:block;position:relative;overflow:hidden;cursor:grab;background:#f8faf9;outline:0}#plot svg{position:absolute;max-width:none;transform-origin:0 0}#plot.panning,#plot.panning svg{cursor:grabbing!important}#plot svg .plot-resize{cursor:nwse-resize;pointer-events:all}
+.canvas-editor{position:absolute;z-index:4;padding:9px;background:white;border:1px solid #76aa9b;border-radius:7px;box-shadow:0 6px 22px #243d4c26}.canvas-editor .field{margin:0}.canvas-editor textarea{min-height:56px;max-height:160px;font-size:16px;line-height:1.5}.canvas-editor .format-bar{justify-content:flex-end}.canvas-editor .format-bar button{min-width:34px;padding:3px 9px}
+.style-details{margin:14px 0;font-size:12px;color:#6d7e81}.style-details summary{cursor:pointer;margin-bottom:10px}.style-details[open]{padding-bottom:4px}[data-legend]{cursor:move}[data-legend] [data-key]{cursor:text}
+.state-row{position:relative;user-select:none}.state-row input{user-select:text}.state-grip{display:inline-grid;place-items:center;flex:0 0 14px;color:#acbab4;cursor:grab;font-size:15px;line-height:18px;touch-action:none}.state-grip:hover,.state-grip:focus-visible{color:var(--accent)}.state-top{gap:5px}.state-row.state-dragging{opacity:.45;border-style:dashed}.state-row.drop-before:before,.state-row.drop-after:after{content:"";position:absolute;left:-2px;right:-2px;height:3px;background:var(--accent);border-radius:3px;z-index:2}.state-row.drop-before:before{top:-5px}.state-row.drop-after:after{bottom:-5px}.sorting-states,.sorting-states *{cursor:grabbing!important;user-select:none!important}
+.cards-open{margin:0 0 12px}.branch-row{margin-left:calc(var(--branch-depth)*10px);border-left:2px solid #9abbb1}.branch-parent{font-size:10px;color:#7d9288;margin:3px 0 0 18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.state-menu{position:fixed;z-index:1000;min-width:148px;padding:5px;border:1px solid var(--border);border-radius:7px;background:white;box-shadow:0 6px 24px #203a4c25}.state-menu button{display:block;width:100%;border:0;text-align:left;font-size:13px;padding:8px 12px}.state-menu button:hover,.state-menu button:focus-visible{background:#edf5f0}.branch-state{margin-bottom:18px;font-size:16px}.cards-dialog{max-width:none;width:calc(100vw - 32px);height:calc(100vh - 32px);max-height:none;padding:0;margin:16px;overflow:hidden}.cards-dialog[open]{display:flex;flex-direction:column}.cards-header{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}.cards-header strong{white-space:nowrap}.cards-header select{max-width:180px;border:1px solid var(--border);border-radius:5px;padding:5px;background:white}.cards-hint{font-size:12px;color:var(--muted);flex:1}.cards-header button{margin-left:auto;white-space:nowrap}.cards-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:7px;padding:8px 16px;border-bottom:1px solid var(--border)}.cards-toolbar button{font-size:12px}.cards-toolbar label{display:flex;align-items:center;font-size:12px;color:var(--muted);gap:5px;margin-left:8px}.cards-toolbar input{accent-color:var(--accent)}#cards-status{font-size:11px;color:var(--muted);margin-left:auto}#cards-scroll{flex:1;min-height:0;overflow:auto;background:#f7faf9}#cards-board{position:relative;outline:0;touch-action:none}#cards-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}#cards-links [data-card-edge]{pointer-events:stroke;cursor:pointer}#cards-nodes{position:absolute;inset:0;pointer-events:none}.network-card{position:absolute;width:210px;height:116px;border:1px solid #d3dfda;border-top:3px solid var(--system-color);border-radius:8px;background:white;padding:10px 13px;box-shadow:0 2px 5px #193b4310;cursor:grab;user-select:none;pointer-events:auto;box-sizing:border-box}.network-card.selected,.network-card.wire-source{border-color:#2f9c80;box-shadow:0 0 0 2px #2f9c8025}.network-system{display:flex;gap:5px;align-items:center;color:#84958c;font-size:10px;white-space:nowrap;overflow:hidden}.network-system small{margin-left:auto;font-size:9px}.network-name{display:block;margin:7px 0 5px;font-size:16px;font-weight:550;line-height:19px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.network-energy{font-size:12px;color:#315b52;display:flex;gap:6px;justify-content:space-between}.network-parent{font-size:10px;color:#879b90;overflow:hidden;max-width:80px;text-overflow:ellipsis;white-space:nowrap}.network-raw{display:flex;gap:12px;color:#8c9b94;font-size:10px;margin-top:5px}.card-port{position:absolute;top:calc(50% - 8px);width:16px;height:16px;border-radius:50%;padding:0;background:white;border:2px solid var(--system-color);cursor:crosshair}.card-port.in{left:-9px}.card-port.out{right:-9px}.card-port:hover{background:#dceee5}.cards-panning{cursor:grabbing}@media(max-width:800px){.cards-hint{display:none}.cards-header{gap:8px}.cards-toolbar label{margin-left:0}.cards-dialog{width:calc(100vw - 12px);height:calc(100vh - 12px);margin:6px}}
+.system-row>.system-color{width:20px;height:20px;flex-shrink:0;border:0;padding:0;border-radius:4px;background:transparent;cursor:pointer}.system-color::-webkit-color-swatch-wrapper{padding:2px}.system-color::-webkit-color-swatch{border:0;border-radius:3px}
+
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-icon"><svg viewBox="0 0 42 42" aria-hidden="true"><path d="M6 30h9v-9h12v-9h9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><strong>台阶图 <span>STEPLOT</span></strong><span class="version">v0.13</span></div>
+    <span id="save-status" class="save-status">空白工程</span>
+    <nav class="top-actions" aria-label="工程操作">
+      <button id="undo" title="撤销 Ctrl+Z">↶</button><button id="redo" title="重做 Ctrl+Y / Ctrl+Shift+Z">↷</button><span class="separator"></span>
+      <button id="new-project">新建</button><button id="open-project">打开</button><button id="save-project" title="导出 JSON · Ctrl+S">保存工程</button><button id="finish-edit">结束编辑</button>
+      <button class="primary" id="export-open">导出图形 ↗</button>
+    </nav>
+  </header>
+  <div id="recovery-bar" class="recovery-bar" hidden><span>有上次编辑的恢复缓存</span><button id="restore-cache">恢复</button><button id="dismiss-cache" class="icon" title="收起">×</button></div>
+  <div class="workspace">
+    <aside class="data-panel">
+      <div class="tabs" role="tablist"><button class="active" data-tab="states">体系与状态</button><button data-tab="refs">小分子参考</button><button data-tab="edges">反应路径</button></div>
+      <div id="data-content" class="panel-scroll"></div>
+    </aside>
+    <div id="left-resize" class="resize-handle" role="separator" aria-label="调整左栏宽度" aria-orientation="vertical" tabindex="0" data-side="left"></div>
+    <main class="main-panel">
+      <div class="canvas-toolbar"><span class="energy-heading">自由能 G</span><span class="toolbar-hint" id="plot-summary"></span><div class="toolbar-end"><select id="preset" aria-label="排版预设"><option value="compact">紧凑</option><option value="wide">横向</option><option value="large">大字</option></select><button id="auto-layout">自动排版</button><button id="style-open">样式</button><button id="focus" title="专注画布">⛶</button></div></div>
+      <div id="text-toolbar" class="text-toolbar" role="toolbar" aria-label="文字格式">
+        <select id="text-font" aria-label="所选文字字体"><option value="">混合字体</option><option value="Arial, Microsoft YaHei, sans-serif">Arial</option><option value="Times New Roman, SimSun, serif">Times New Roman</option><option value="Microsoft YaHei, sans-serif">微软雅黑</option><option value="SimSun, serif">宋体</option><option value="Calibri, Microsoft YaHei, sans-serif">Calibri</option></select>
+        <input id="text-size" type="number" min="8" max="80" step="1" aria-label="所选文字字号" placeholder="字号">
+        <button id="text-bold" title="加粗" aria-label="所选文字加粗"><strong>B</strong></button>
+        <input id="text-color" type="color" value="#293f4c" aria-label="所选文字颜色" title="文字颜色">
+        <div class="text-swatches"><button data-action="annotation-color" data-id="#293f4c" style="--swatch:#293f4c" aria-label="所选文字颜色 深灰"></button><button data-action="annotation-color" data-id="#277da8" style="--swatch:#277da8" aria-label="所选文字颜色 蓝色"></button><button data-action="annotation-color" data-id="#e48b32" style="--swatch:#e48b32" aria-label="所选文字颜色 橙色"></button><button data-action="annotation-color" data-id="#3d997a" style="--swatch:#3d997a" aria-label="所选文字颜色 绿色"></button><button data-action="annotation-color" data-id="#d56172" style="--swatch:#d56172" aria-label="所选文字颜色 红色"></button></div>
+        <button id="text-reset" title="恢复所选文字的默认字体、字号和颜色">默认</button><span id="text-count">未选择文字</span>
+      </div>
+      <div class="canvas-card"><div class="canvas-card-top"><span>即时预览</span><select id="zoom" aria-label="预览缩放" title="Ctrl + 滚轮缩放；拖动空白处平移"><option value="fit">适应画布</option><option value="100">100%</option><option value="125">125%</option><option value="custom" hidden>自定义</option></select></div><div id="plot-scroll"><div id="plot" tabindex="0" aria-label="图形画布"></div></div><div class="canvas-card-bottom"><span id="selection-hint"></span><span id="dimensions"></span></div><div id="canvas-editor" class="canvas-editor" hidden><div class="field"><textarea id="canvas-text" aria-label="编辑图中文字" rows="2"></textarea><div class="format-bar"><button data-format="sub" title="下标">x₂</button><button data-format="super" title="上标">x²</button><button id="canvas-text-apply" title="保存 Enter">✓</button><button id="canvas-text-cancel" title="取消 Esc">×</button></div></div></div></div>
+      <div id="warnings" role="status"></div>
+    </main>
+    <div id="right-resize" class="resize-handle" role="separator" aria-label="调整右栏宽度" aria-orientation="vertical" tabindex="0" data-side="right"></div>
+    <aside id="inspector" class="inspector"><div class="inspector-heading"><div class="tabs"><button class="active" data-inspect="object">对象</button><button data-inspect="style">全局样式</button></div><button id="inspector-close" class="icon" title="收起右栏">×</button></div><div id="inspector-content" class="panel-scroll"></div></aside>
+  </div>
+  <div id="toast" role="status"></div>
+  <div id="state-menu" class="state-menu" role="menu" aria-label="状态操作" hidden><button type="button" role="menuitem" data-state-command="branch">设为分支…</button><button type="button" role="menuitem" data-state-command="main">设为主路径</button><button type="button" role="menuitem" data-state-command="delete" class="danger">删除状态</button></div>
+  <dialog id="branch-dialog"><div class="dialog-head"><h2>设为分支</h2><button data-close class="icon">×</button></div><div id="branch-state" class="branch-state"></div><label class="field">起点结构<select id="branch-parent" aria-label="分支起点结构"></select></label><div id="branch-error" class="error"></div><div class="dialog-actions"><button data-close>取消</button><button id="branch-apply" class="primary">设为分支</button></div></dialog>
+  <dialog id="cards-dialog" class="cards-dialog"><div class="cards-header"><strong>卡片模式</strong><select id="cards-system" aria-label="卡片画布体系"><option value="all">全部体系</option></select><span class="cards-hint">Ctrl+单击多选 · 拖动卡片 · 右圆点连线 · 右键整理</span><button id="cards-close">返回台阶图</button></div><div class="cards-toolbar"><button id="cards-undo" title="撤销 Ctrl+Z">↶</button><button id="cards-redo" title="重做 Ctrl+Y">↷</button><button id="cards-arrange">整理卡片</button><button id="cards-clear">清空连接</button><button id="cards-remove" disabled>删除所选</button><label><input id="cards-stages" type="checkbox" checked>按连接排阶段</label><span id="cards-status"></span></div><div id="cards-scroll"><div id="cards-board" tabindex="0" aria-label="状态卡片画布"><svg id="cards-links" xmlns="http://www.w3.org/2000/svg"></svg><div id="cards-nodes"></div></div></div></dialog>
+  <dialog id="paste-dialog"><div class="dialog-head"><h2>粘贴状态表格</h2><button data-close class="icon">×</button></div><textarea id="paste-data" rows="7" placeholder="粘贴名称、E、Gcorr 表格（横向或纵向）" aria-label="状态表格"></textarea><label class="field">导入方式<select id="paste-mode"><option value="replace">替换当前体系</option><option value="append">追加到当前体系</option></select></label><div id="paste-error" class="error"></div><div class="dialog-actions"><button data-close>取消</button><button id="paste-apply" class="primary">导入 · 自动识别参考项</button></div></dialog>
+  <dialog id="export-dialog"><div class="dialog-head"><h2>导出图形</h2><button data-close class="icon">×</button></div><div class="export-options"><button id="export-svg"><strong>SVG</strong><span>矢量图</span></button><button id="export-png"><strong>PNG</strong><span>高清图片</span></button></div><label class="field">PNG 放大倍数<select id="png-scale"><option value="2">2×</option><option value="3" selected>3×</option><option value="4">4×</option></select></label><button id="export-csv" class="full">导出计算结果 CSV</button></dialog>
+  <dialog id="ref-paste-dialog"><div class="dialog-head"><h2>粘贴小分子参考表</h2><button data-close class="icon">×</button></div><textarea id="ref-paste-data" rows="7" placeholder="粘贴小分子名称、E、Gcorr 表格" aria-label="小分子表格"></textarea><div id="ref-paste-error" class="error"></div><div class="dialog-actions"><button data-close>取消</button><button id="ref-paste-apply" class="primary">更新参考库</button></div></dialog>
+  <dialog id="connect-dialog"><div class="dialog-head"><h2>添加连接</h2><button data-close class="icon">×</button></div><p id="connect-system"></p><label class="field">起点<select id="connect-from" aria-label="连接起点"></select></label><label class="field">终点<select id="connect-to" aria-label="连接终点"></select></label><div id="connect-error" class="error"></div><div class="dialog-actions"><button data-close>取消</button><button id="connect-apply" class="primary">添加连接</button></div></dialog>
+  <dialog id="confirm-dialog"><div class="dialog-head"><h2 id="confirm-title"></h2></div><p>当前修改尚未导出。</p><div class="dialog-actions"><button data-close>取消</button><button id="confirm-save">保存当前工程</button><button id="confirm-apply" class="primary">继续</button></div></dialog>
+  <dialog id="finish-dialog"><div class="dialog-head"><h2>结束编辑</h2><button data-close class="icon">×</button></div><p id="finish-message"></p><div class="dialog-actions"><button data-close>取消</button><button id="finish-cache">仅保留恢复缓存</button><button id="finish-save" class="primary">导出工程并结束</button></div></dialog>
+  <input id="project-file" type="file" accept=".json,application/json" hidden>
+  <dialog id="save-error-dialog"><div class="dialog-head"><h2>未保存</h2><button data-close class="icon">×</button></div><p id="save-error-message"></p><div class="dialog-actions"><button data-close>关闭</button></div></dialog>
+  <script>
+(function (root) {
+  'use strict';
+  const factor = { eV: 1, 'kJ/mol': 96.48533212, 'kcal/mol': 23.06054783 };
+  const uid = () => 'id' + Math.random().toString(36).slice(2, 10);
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const newHistory = () => ({ entries: [], index: -1, group: '' });
+  function recordHistory(history, value, group = '') {
+    if (history.entries[history.index] === value) { if (!group) history.group = ''; return; }
+    if (group && history.group === group && history.index === history.entries.length - 1) history.entries[history.index] = value;
+    else {
+      history.entries = history.entries.slice(0, history.index + 1);
+      history.entries.push(value); if (history.entries.length > 80) history.entries.shift();
+      history.index = history.entries.length - 1;
+    }
+    history.group = group;
+  }
+  function moveHistory(history, direction) {
+    history.group = '';
+    const index = history.index + direction;
+    if (index < 0 || index >= history.entries.length) return null;
+    history.index = index; return history.entries[index];
+  }
+  const defaults = () => ({ width: 1040, height: 660, plotWidth: '', plotHeight: '', font: 'Arial, Microsoft YaHei, sans-serif',
+    fontSize: 24, deltaSize: 20, titleSize: 27, lineWidth: 3.5, stepWidth: 0.60,
+    dash: 7, gap: 5, grid: true, gridWidth: .8, gridColor: '#edf0f1', axisWidth: 1.2, axisColor: '#63747d',
+    legendVisible: true, legendLayout: 'horizontal', legendSize: '', legendFont: '', legendColor: '#425867', legendBold: false,
+    legendDx: 0, legendDy: 0, legendLineWidth: '', legendLineLength: 28, legendGap: 22,
+    legendBox: false, legendBackground: '#ffffff', legendBorderColor: '#cbd5d8', legendBorderWidth: 1,
+    deltas: true, energies: false,
+    decimals: 2, yMin: '', yMax: '', unit: 'eV', theme: 'blue', legend: 'top' });
+  function blank() {
+    return { version: 1, title: 'Free energy diagram', subtitle: '', xLabel: 'Reaction coordinate',
+      yLabel: 'Relative free energy', note: '', inputMode: 'raw', energyMode: 'G',
+      refs: [], systems: [], style: defaults(), annotations: {} };
+  }
+  function parseTerms(source, refs) {
+    if (!source.trim()) return { terms: [], error: '' };
+    const terms = [];
+    for (const part of source.split(/[,;，；\n]+/).filter(s => s.trim())) {
+      const match = part.trim().match(/^([A-Za-z][A-Za-z0-9_-]*)\s*[:=：]\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/);
+      if (!match) return { terms: [], error: '格式示例：H2:0.5, H2O:-1（使用参考库中的 ID）' };
+      terms.push({ ref: match[1], n: Number(match[2]) });
+    }
+    return { terms, error: '' };
+  }
+  const termsText = terms => terms.map(term => term.ref + ':' + term.n).join(', ');
+  const ready = v => typeof v === 'number' && Number.isFinite(v);
+  function combined(project, state) {
+    const corrected = project.energyMode === 'G';
+    const pieces = [{ name: '结构 E', value: state.e }];
+    if (corrected) pieces.push({ name: '结构 Gcorr', value: state.gcorr });
+    const pending = [];
+    for (const term of state.terms) {
+      const ref = project.refs.find(r => r.id === term.ref);
+      const valid = ref && ready(ref.e) && (!corrected || ready(ref.gcorr));
+      if (!valid && term.n) pending.push(term.ref);
+      pieces.push({ name: term.n + ' × ' + (ref?.name || term.ref), value: !term.n ? 0 : valid ? term.n * (ref.e + (corrected ? ref.gcorr : 0)) : null });
+    }
+    pieces.push({ name: '额外修正', value: state.correction });
+    return { value: pieces.every(p => ready(p.value)) ? pieces.reduce((sum, p) => sum + p.value, 0) : NaN, pieces, pending, error: '' };
+  }
+  function energy(project, system, state) {
+    if (state.placeholder) return { value: NaN, absolute: null, baseline: null, pieces: [], pending: [], error: '' };
+    if (project.inputMode === 'relative') return { value: ready(state.relative) ? state.relative : NaN, absolute: null, baseline: null, pieces: [], error: '' };
+    const base = system.nodes.find(node => node.id === system.baseline);
+    if (!base) return { value: NaN, error: '请为 ' + system.name + ' 选择参照状态' };
+    const a = combined(project, state), b = combined(project, base), corrected = project.energyMode === 'G';
+    let value = [state.e, base.e, ...(corrected ? [state.gcorr, base.gcorr] : [])].every(ready) ? state.e - base.e + (corrected ? state.gcorr - base.gcorr : 0) + state.correction - base.correction : NaN;
+    const net = new Map();
+    for (const [node, sign] of [[state,1],[base,-1]]) for (const t of node.terms) net.set(t.ref, (net.get(t.ref) || 0) + sign * t.n);
+    const pending = [];
+    for (const [id, n] of net) if (Math.abs(n) > 1e-10) {
+      const ref = project.refs.find(r => r.id === id);
+      if (!ref || !ready(ref.e) || (corrected && !ready(ref.gcorr))) { pending.push(id); value = NaN; }
+      else value += n * (ref.e + (corrected ? ref.gcorr : 0));
+    }
+    if (state.autoIssue || base.autoIssue) value = NaN;
+    return { value, absolute: a.value, baseline: b.value, pieces: a.pieces, pending, error: '' };
+  }
+  function node(label, stage, e = null) {
+    return { id: uid(), label, stage, e, gcorr: 0, terms: [], correction: 0, relative: null, x: 0, width: 1, showLabel: true };
+  }
+  function labelVisible(project, node) {
+    const a = project.annotations['node:' + node.id] || {};
+    return node.showLabel !== false && !a.hidden && String(a.text ?? node.label).trim() !== '';
+  }
+  function setLabelVisible(project, node, visible) {
+    node.showLabel = visible;
+    const a = project.annotations['node:' + node.id];
+    if (a) { delete a.hidden; if (visible && a.text?.trim() === '') delete a.text; }
+  }
+  function patchAnnotations(project, keys, patch) {
+    for (const key of keys) {
+      const a = project.annotations[key] ||= {};
+      for (const [field, value] of Object.entries(patch)) { if (value === undefined) delete a[field]; else a[field] = value; }
+      if (patch.color) delete a.colorSystem;
+      if (patch.colorSystem) delete a.color;
+    }
+  }
+  function setSystemName(project, system, name) {
+    system.name = name;
+    const legend = project.annotations['legend:' + system.id];
+    if (legend) delete legend.text;
+  }
+  function setSystemColor(project, system, color) {
+    system.color = color;
+    const keys = ['legend:' + system.id, ...system.nodes.flatMap(n => ['node:' + n.id, 'energy:' + n.id]), ...system.edges.flatMap(e => ['delta:' + e.id, 'ts:' + e.id])];
+    patchAnnotations(project, keys, { colorSystem: system.id });
+  }
+  function exportName(project, extension) {
+    const names = project.systems.map(s => optionText(s.name).replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim().replace(/\s+/g, '-').replace(/[. ]+$/g, '').slice(0, 24)).filter(Boolean);
+    let name = names.slice(0, 2).join('_') || 'stepplot';
+    if (names.length > 2) name += '+' + (names.length - 2);
+    if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name)) name = 'plot-' + name;
+    return name + '.' + extension;
+  }
+  function zoomView(view, factor, point) {
+    const zoom = Math.max(.25, Math.min(8, view.zoom * factor)), ratio = zoom / view.zoom;
+    return { zoom, x: point.x - (point.x - view.x) * ratio, y: point.y - (point.y - view.y) * ratio };
+  }
+  const edge = (from, to, auto = false) => ({ id: uid(), from, to, ts: null, showDelta: true, auto });
+  function branchGroup(system, id) {
+    const ids = new Set([id]);
+    for (let size = -1; size !== ids.size;) { size = ids.size; for (const n of system.nodes) if (ids.has(n.branchOf)) ids.add(n.id); }
+    return system.nodes.filter(n => ids.has(n.id));
+  }
+  function orderedNodes(system) {
+    const sorted = system.nodes.slice().sort((a,b) => a.stage-b.stage), result = [];
+    const visit = parent => { for (const n of sorted.filter(n => (n.branchOf || '') === parent)) { result.push(n); visit(n.id); } };
+    visit(''); return result;
+  }
+  function sortTarget(system, id, targetId) {
+    const from = system.nodes.find(n => n.id === id), parent = from?.branchOf || '';
+    let target = system.nodes.find(n => n.id === targetId);
+    while (target && (target.branchOf || '') !== parent) target = system.nodes.find(n => n.id === target.branchOf);
+    return target?.id === id ? null : target;
+  }
+  const mainNodes = system => system.nodes.filter(n => !n.branchOf && !n.placeholder).slice().sort((a,b) => a.stage-b.stage);
+  function autoPath(system) {
+    const nodes = mainNodes(system), ids = new Set(nodes.map(n => n.id)), edges = system.edges.filter(e => ids.has(e.from) && ids.has(e.to));
+    return nodes.every((n,i) => !i || n.stage > nodes[i-1].stage) && edges.length === nodes.length-1 && edges.every(e => e.auto !== false && !e.ts) && nodes.slice(1).every((n,i) => edges.some(e => e.from === nodes[i].id && e.to === n.id)) ? edges : null;
+  }
+  function reconnectPath(system, old) {
+    if (!old) return false;
+    const nodes = mainNodes(system), ids = new Set(old.map(e => e.id)), available = system.edges.slice(), rest = system.edges.filter(e => !ids.has(e.id) || e.branchLink);
+    const path = nodes.slice(1).map((n,i) => {
+      const e = available.find(e => e.from === nodes[i].id && e.to === n.id) || edge(nodes[i].id,n.id,true);
+      if (!e.ts) e.auto = true; e.branchLink = false;
+      const index = rest.indexOf(e); if (index >= 0) rest.splice(index,1); return e;
+    });
+    system.edges = [...path,...rest]; return true;
+  }
+  function shiftBranch(system, id, delta, field = 'stage') { for (const n of branchGroup(system,id)) n[field] += delta; }
+  function syncTransitionStages(system) { for (const e of system.edges) if (e.ts) e.ts.stage = (system.nodes.find(n => n.id === e.from).stage + system.nodes.find(n => n.id === e.to).stage)/2; }
+  function reorderNode(system, id, targetId, after = false) {
+    const from = system.nodes.find(n => n.id === id), target = sortTarget(system,id,targetId);
+    if (!from || !target || from === target) return { moved: false };
+    const parent = from.branchOf || '', ordered = system.nodes.filter(n => (n.branchOf || '') === parent).slice().sort((a,b) => a.stage-b.stage), stages = ordered.map(n => n.stage), path = parent ? null : autoPath(system);
+    const next = ordered.filter(n => n !== from); next.splice(next.indexOf(target) + Number(after),0,from);
+    if (next.every((n,i) => n === ordered[i])) return { moved: false };
+    next.forEach((n,i) => shiftBranch(system,n.id,stages[i]-n.stage));
+    system.nodes = [...next,...system.nodes.filter(n => !next.includes(n))]; system.nodes = orderedNodes(system);
+    const reconnected = reconnectPath(system,path); syncTransitionStages(system);
+    return { moved: true, reconnected };
+  }
+  function setBranch(system, id, parentId) {
+    const n = system.nodes.find(n => n.id === id), parent = system.nodes.find(n => n.id === parentId);
+    if (!n || n.placeholder || parentId && (!parent || parent.placeholder || branchGroup(system,id).includes(parent))) return { error: '请选择同一体系中其他结构，不能选择自己或自己的后续分支。' };
+    if ((n.branchOf || '') === parentId) return { error: '', moved: false };
+    const path = autoPath(system);
+    system.edges = system.edges.filter(e => {
+      if (!e.branchLink || e.to !== id || e.from === parentId) return true;
+      if (e.ts) { e.branchLink = false; e.auto = false; return true; } return false;
+    });
+    if (parent) {
+      shiftBranch(system,id,parent.stage+1-n.stage); n.branchOf = parentId; n.x = 0;
+      const e = system.edges.find(e => e.from === parentId && e.to === id) || edge(parentId,id);
+      e.auto = false; e.branchLink = true; if (!system.edges.includes(e)) system.edges.push(e);
+    } else {
+      delete n.branchOf;
+      for (const root of system.nodes.filter(item => item !== n && !item.branchOf && item.stage >= n.stage)) shiftBranch(system,root.id,1);
+    }
+    reconnectPath(system,path); system.nodes = orderedNodes(system); syncTransitionStages(system);
+    return { error: '', moved: true };
+  }
+  function preserveTransition(system, e, annotations = {}) {
+    if (!e.ts) return null;
+    const n = {...clone(e.ts),id:uid(),transition:true,width:.25}; delete n.branchOf;
+    system.nodes.push(n);
+    if (annotations['ts:'+e.id]) annotations['node:'+n.id] = clone(annotations['ts:'+e.id]);
+    return n;
+  }
+  function clearConnections(system, annotations = {}) {
+    const retained = system.edges.filter(e=>e.ts).length;
+    for (const e of system.edges) preserveTransition(system,e,annotations);
+    system.edges = []; for (const n of system.nodes) delete n.branchOf;
+    return retained;
+  }
+  function removeNode(system, id, annotations = {}) {
+    const n = system.nodes.find(n => n.id === id);
+    if (!n) return { error: '状态已不存在。' };
+    if (n.placeholder) { removeBlank(system,id); return { error: '' }; }
+    if (system.nodes.filter(n => !n.placeholder).length === 1) return { error: '体系至少保留一个状态。' };
+    const path = autoPath(system), children = system.nodes.filter(item => item.branchOf === id);
+    for (const e of system.edges.filter(e=>e.from===id || e.to===id)) preserveTransition(system,e,annotations);
+    system.nodes = system.nodes.filter(item => item !== n); system.edges = system.edges.filter(e => e.from !== id && e.to !== id);
+    for (const child of children) {
+      if (n.branchOf) {
+        child.branchOf = n.branchOf; const parent = system.nodes.find(item => item.id === n.branchOf);
+        shiftBranch(system,child.id,parent.stage+1-child.stage); system.edges.push({ ...edge(parent.id,child.id), branchLink:true });
+      } else delete child.branchOf;
+    }
+    if (children.length && !n.branchOf) {
+      let previous = -Infinity;
+      for (const root of system.nodes.filter(n => !n.branchOf).sort((a,b) => a.stage-b.stage)) { if (root.stage <= previous) shiftBranch(system,root.id,previous+1-root.stage); previous = root.stage; }
+    }
+    reconnectPath(system,path); system.nodes = orderedNodes(system); syncTransitionStages(system);
+    if (system.baseline === id) system.baseline = system.nodes.find(n => !n.placeholder).id;
+    if (system.termOrigin === id) system.termOrigin = '';
+    return { error: '', retained: children.length };
+  }
+  function networkStages(system) {
+    const nodes = system.nodes.filter(n => !n.placeholder), incoming = new Map(nodes.map(n => [n.id,0])), levels = new Map(nodes.map(n => [n.id,0]));
+    for (const e of system.edges) incoming.set(e.to,incoming.get(e.to)+1);
+    const queue = nodes.filter(n => incoming.get(n.id) === 0).map(n => n.id); let count = 0;
+    while (queue.length) {
+      const id = queue.shift(); count++;
+      for (const e of system.edges.filter(e => e.from === id)) { levels.set(e.to,Math.max(levels.get(e.to),levels.get(id)+1)); incoming.set(e.to,incoming.get(e.to)-1); if (!incoming.get(e.to)) queue.push(e.to); }
+    }
+    if (count !== nodes.length) return { error: '连接包含环路，阶段保持原值，可手动调整。' };
+    const connected = new Set(system.edges.flatMap(e => [e.from,e.to]));
+    for (const n of nodes) if (connected.has(n.id)) n.stage = levels.get(n.id);
+    syncTransitionStages(system); return { error: '' };
+  }
+  function branch(from, label) {
+    const n = { ...clone(from), id: uid(), label, stage: from.stage + 1, x: 0, showLabel: true, branchOf: from.id };
+    delete n.cardX; delete n.cardY; return n;
+  }
+  function insertBlank(system, beforeId = '') {
+    const before = system.nodes.find(n => n.id === beforeId), stage = before ? before.stage : Math.max(...system.nodes.map(n=>n.stage))+1;
+    for (const n of system.nodes) if (n.stage >= stage) n.stage++;
+    const item = { ...node('',stage), placeholder:true, showLabel:false };
+    system.nodes.splice(before ? system.nodes.indexOf(before) : system.nodes.length,0,item);
+    return item;
+  }
+  function removeBlank(system,id) {
+    const item = system.nodes.find(n=>n.id===id);
+    for (const n of system.nodes) if (n.stage > item.stage) n.stage--;
+    system.nodes = system.nodes.filter(n=>n!==item);
+  }
+  function horizontalLayout(systems,left,right,stepWidth) {
+    const nodes=systems.flatMap(s=>s.nodes), stages=[...new Set(nodes.map(n=>n.stage))].sort((a,b)=>a-b);
+    const span=(right-left)/Math.max(stages.length,1);
+    return { stages, positions:new Map(nodes.map(n=>[n.id,{x:left+(stages.indexOf(n.stage)+.5)*span+n.x,half:span*stepWidth*n.width/2}])) };
+  }
+  function connect(system, from, to, auto = false) {
+    if (!system || !system.nodes.some(n => n.id === from && !n.placeholder) || !system.nodes.some(n => n.id === to && !n.placeholder)) return { error: '请在同一体系中选择起点和终点。' };
+    if (from === to) return { error: '起点和终点需要是不同台阶。' };
+    if (system.edges.some(e => e.from === from && e.to === to)) return { error: '这两条台阶已经按此方向连接。' };
+    const item = edge(from, to, auto); system.edges.push(item); return { edge: item, error: '' };
+  }
+  function textRuns(text) {
+    const runs = [], pattern = /([_^])(?:\{([^{}\n]*)\}|([^\s{}_^]))/g;
+    let start = 0;
+    for (const match of String(text).matchAll(pattern)) {
+      if (match.index > start) runs.push({ text: text.slice(start, match.index), script: '' });
+      runs.push({ text: match[2] ?? match[3], script: match[1] === '_' ? 'sub' : 'super' });
+      start = match.index + match[0].length;
+    }
+    if (start < text.length) runs.push({ text: text.slice(start), script: '' });
+    return runs;
+  }
+  function formatRange(text, start, end, kind) {
+    const marker = kind === 'sub' ? '_' : '^', selected = text.slice(start, end);
+    if (start >= end) return { value: text, start, end, error: '先选中要设为上标或下标的文字。' };
+    if (text.slice(Math.max(0, start - 2), start) === marker + '{' && text[end] === '}') {
+      return { value: text.slice(0, start - 2) + selected + text.slice(end + 1), start: start - 2, end: end - 2, error: '' };
+    }
+    const wrapped = selected.match(/^([_^])\{([^{}]*)\}$/);
+    if (wrapped) {
+      const inner = wrapped[2], replacement = wrapped[1] === marker ? inner : marker + '{' + inner + '}';
+      return { value: text.slice(0, start) + replacement + text.slice(end), start, end: start + replacement.length, error: '' };
+    }
+    return { value: text.slice(0, start) + marker + '{' + selected + '}' + text.slice(end), start: start + 2, end: end + 2, error: '' };
+  }
+  const plainDigits = text => text.replace(/[₀₁₂₃₄₅₆₇₈₉⁰¹²³⁴⁵⁶⁷⁸⁹]/g, ch => String('₀₁₂₃₄₅₆₇₈₉'.includes(ch) ? '₀₁₂₃₄₅₆₇₈₉'.indexOf(ch) : '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(ch)));
+  const refId = name => textRuns(name).map(r => plainDigits(r.text)).join('').replace(/\s/g, '');
+  const linkedRef = ref => ref.syncName ?? (refId(ref.name) === ref.id);
+  function renameRef(project, ref, id) {
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(id) || project.refs.some(r => r !== ref && r.id === id)) return 'ID 必须以英文字母开头，只含字母、数字、_、-，且不能重复。';
+    for (const s of project.systems) for (const n of [...s.nodes, ...s.edges.filter(e => e.ts).map(e => e.ts)]) for (const t of n.terms) if (t.ref === ref.id) t.ref = id;
+    ref.id = id; return '';
+  }
+  function formatDigits(text, kind) {
+    const runs = [];
+    for (const run of textRuns(text)) for (const part of plainDigits(run.text).match(/\d+|\D+/g) || []) {
+      const script = /^\d+$/.test(part) ? kind : run.script, last = runs.at(-1);
+      if (last?.script === script) last.text += part; else runs.push({ text: part, script });
+    }
+    return runs.map(r => r.script ? (r.script === 'sub' ? '_' : '^') + '{' + r.text + '}' : r.text).join('');
+  }
+  function formatText(text, start, end, kind) {
+    return start < end ? formatRange(text, start, end, kind) : { value: formatDigits(text, kind), start, end, error: '' };
+  }
+  function optionText(text) {
+    const maps = { sub: ['0123456789+-=()', '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎'], super: ['0123456789+-=()', '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾'] };
+    return textRuns(text).map(r => !r.script ? r.text : [...r.text].map(ch => { const [from, to] = maps[r.script], i = from.indexOf(ch); return i < 0 ? ch : to[i]; }).join('')).join('');
+  }
+  function demo() {
+    const p = blank();
+    p.title = '简单演示（虚构数据）'; p.inputMode = 'relative';
+    const s = newSystem(p, '演示（虚构）'); s.nodes = ['A','B','C'].map((label,i) => ({ ...node(label,i), relative: [0,.4,-.2][i] }));
+    s.baseline = s.nodes[0].id; s.edges = s.nodes.slice(1).map((n,i) => edge(s.nodes[i].id,n.id,true)); p.systems.push(s);
+    return p;
+  }
+  function newSystem(project, name = '新体系', copyFrom = null) {
+    const colors = ['#277da8', '#e48b32', '#8a61b1', '#3d997a', '#d56172'];
+    const s = { id: uid(), name, color: colors[project.systems.length % colors.length], visible: true, baseline: '', termOrigin: '', nodes: [], edges: [] };
+    if (copyFrom) {
+      const map = {};
+      s.nodes = copyFrom.nodes.map(n => { const item = clone(n); item.id = uid(); map[n.id] = item.id; return item; });
+      s.nodes.forEach(n => { if (n.branchOf) n.branchOf = map[n.branchOf]; if (n.cardY !== undefined) n.cardY += 150; });
+      s.edges = copyFrom.edges.map(e => ({ ...clone(e), id: uid(), from: map[e.from], to: map[e.to] }));
+      s.baseline = map[copyFrom.baseline];
+      s.termOrigin = map[copyFrom.termOrigin] || '';
+    } else {
+      s.nodes = [node('初始态', 0)]; s.baseline = s.nodes[0].id;
+    }
+    return s;
+  }
+  function validate(p) {
+    if (!p || p.version !== 1 || !Array.isArray(p.systems) || !Array.isArray(p.refs) || !p.style || !p.annotations) return '不是有效的阶图工程文件。';
+    const finite = v => typeof v === 'number' && Number.isFinite(v);
+    const safeId = id => typeof id === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,80}$/.test(id);
+    const nullable = v => v === null || finite(v);
+    const rawState = n => safeId(n.id) && typeof n.label === 'string' &&
+      ['e','gcorr','relative'].every(k => nullable(n[k])) && ['correction','stage','x','width'].every(k => finite(n[k])) && n.width > 0 &&
+      Array.isArray(n.terms) && n.terms.every(t => safeId(t.ref) && finite(t.n)) &&
+      ['showLabel','placeholder','transition'].every(k=>n[k]===undefined || typeof n[k]==='boolean');
+    if (!['raw', 'relative'].includes(p.inputMode) || !['E', 'G'].includes(p.energyMode)) return '能量模式无效。';
+    if (!['title', 'subtitle', 'xLabel', 'yLabel', 'note'].every(k => typeof p[k] === 'string')) return '图中文字字段不完整。';
+    if (!p.refs.every(r => safeId(r.id) && typeof r.name === 'string' && nullable(r.e) && nullable(r.gcorr) && (r.syncName === undefined || typeof r.syncName === 'boolean')) || new Set(p.refs.map(r => r.id)).size !== p.refs.length) return '参考库格式不正确或 ID 重复。';
+    const ids = [];
+    for (const s of p.systems) {
+      if (!Array.isArray(s.nodes) || !Array.isArray(s.edges) || !s.nodes.length || !s.nodes.every(rawState)) return '体系状态数据不完整。';
+      for (const n of s.nodes) {
+        if (n.branchOf !== undefined && n.branchOf !== '' && !safeId(n.branchOf)) return '分支起点无效。';
+        if (['cardX','cardY'].some(k => n[k] !== undefined && (!finite(n[k]) || n[k] < 0 || n[k] > 20000))) return '卡片位置无效。';
+        if (n.branchOf && (n.placeholder || !s.nodes.some(parent => parent.id === n.branchOf && !parent.placeholder))) return '分支起点无效。';
+        const seen = new Set([n.id]); let parent = n.branchOf;
+        while (parent) { if (seen.has(parent)) return '分支起点不能形成环路。'; seen.add(parent); parent = s.nodes.find(n => n.id === parent)?.branchOf; }
+      }
+      if (!safeId(s.id) || typeof s.name !== 'string' || !/^#[0-9a-f]{6}$/i.test(s.color) || typeof s.visible !== 'boolean' || !s.nodes.some(n => n.id === s.baseline && !n.placeholder)) return '体系样式或参照状态无效。';
+      if (s.termOrigin && !s.nodes.some(n=>n.id===s.termOrigin && !n.placeholder)) return '参考项起点无效。';
+      if (!s.edges.every(e => safeId(e.id) && s.nodes.some(n => n.id === e.from && !n.placeholder) && s.nodes.some(n => n.id === e.to && !n.placeholder) && e.from !== e.to && ['auto','branchLink'].every(k => e[k] === undefined || typeof e[k] === 'boolean') && (!e.ts || rawState(e.ts) && !e.ts.placeholder))) return '反应连接或过渡态无效。';
+      ids.push(s.id, ...s.nodes.map(n => n.id), ...s.edges.map(e => e.id));
+    }
+    if (new Set(ids).size !== ids.length) return '工程中的对象 ID 重复。';
+    const ranges = { width: [560, 2400], height: [400, 1600], fontSize: [10, 64], deltaSize: [10, 64], titleSize: [12, 64], lineWidth: [1, 12], stepWidth: [0.15, 0.9], dash: [0, 30], gap: [0, 30], decimals: [0, 5] };
+    for (const [key, [min, max]] of Object.entries(ranges)) if (!finite(p.style[key]) || p.style[key] < min || p.style[key] > max) return '画布参数超出范围：' + key;
+    if (!Object.hasOwn(factor, p.style.unit) || typeof p.style.font !== 'string') return '字体或显示单位无效。';
+    for (const k of ['yMin', 'yMax']) if (p.style[k] !== '' && !finite(p.style[k])) return '纵轴范围无效。';
+    for (const k of ['plotWidth', 'plotHeight']) if (p.style[k] !== undefined && p.style[k] !== '' && (!finite(p.style[k]) || p.style[k] <= 0 || p.style[k] > 2400)) return '绘图区尺寸无效。';
+    const optionalRanges = { gridWidth: [.1, 12], axisWidth: [.1, 12], legendSize: [8, 80], legendLineWidth: [.1, 12], legendLineLength: [8, 120], legendGap: [0, 100], legendBorderWidth: [.1, 12], legendDx: [-2400, 2400], legendDy: [-2400, 2400] };
+    for (const [k, [min, max]] of Object.entries(optionalRanges)) {
+      const value = p.style[k];
+      if (value === undefined || value === '' && ['legendSize', 'legendLineWidth'].includes(k)) continue;
+      if (!finite(value) || value < min || value > max) return '图形样式超出范围：' + k;
+    }
+    for (const k of ['gridColor', 'axisColor', 'legendColor', 'legendBackground', 'legendBorderColor']) if (p.style[k] !== undefined && !/^#[0-9a-f]{6}$/i.test(p.style[k])) return '图形颜色无效：' + k;
+    for (const k of ['legendVisible', 'legendBold', 'legendBox']) if (p.style[k] !== undefined && typeof p.style[k] !== 'boolean') return '图例开关无效。';
+    if (p.style.legendLayout !== undefined && !['horizontal', 'vertical'].includes(p.style.legendLayout)) return '图例排列无效。';
+    if (p.style.legendFont !== undefined && typeof p.style.legendFont !== 'string') return '图例字体无效。';
+    if (p.style.yMin !== '' && p.style.yMax !== '' && p.style.yMin >= p.style.yMax) return '纵轴上限应大于下限。';
+    for (const a of Object.values(p.annotations)) {
+      if (!a || (a.text !== undefined && typeof a.text !== 'string') || (a.font !== undefined && typeof a.font !== 'string') || (a.bold !== undefined && typeof a.bold !== 'boolean') || ['dx', 'dy', 'size'].some(k => a[k] !== undefined && !finite(a[k])) || (a.size !== undefined && (a.size < 8 || a.size > 80)) || (a.color && !/^#[0-9a-f]{6}$/i.test(a.color)) || (a.colorSystem && !safeId(a.colorSystem))) return '标注数据无效。';
+    }
+    return '';
+  }
+  function parsePaste(text) {
+    const lines = text.trim().split(/\r?\n/).filter(s => s.trim());
+    const table = lines.map(line => line.split(line.includes('\t') ? '\t' : ',').map(s => s.trim()));
+    const eRow = table.findIndex(row => row.some((v, i) => /^E$/i.test(v) && row.slice(i + 1).some(n => n !== '' && Number.isFinite(Number(n)))));
+    if (eRow >= 0) {
+      const start = table[eRow].findIndex(v => /^E$/i.test(v)) + 1, header = table[eRow - 1] || [];
+      const gRow = table.find(row => row.some(v => /^G_?corr$/i.test(v)));
+      const gStart = gRow ? gRow.findIndex(v => /^G_?corr$/i.test(v)) + 1 : start;
+      const names = header.filter(Boolean), rows = [];
+      for (let i = start; i < table[eRow].length; i++) {
+        const e = table[eRow][i], gcorr = gRow ? gRow[gStart + i - start] : '0';
+        if (e === '' || gcorr === undefined || gcorr === '' || !Number.isFinite(Number(e)) || !Number.isFinite(Number(gcorr))) return { error: '横向表格中的 E / Gcorr 必须为有效数字。', rows: [] };
+        const label = names.slice(-(table[eRow].length - start))[i - start] || ('状态 ' + rows.length);
+        rows.push({ label, e: Number(e), gcorr: Number(gcorr), stage: rows.length, correction: 0 });
+      }
+      return { rows, error: rows.length ? '' : '横向表格没有能量数据。' };
+    }
+    const result = [];
+    for (const line of lines) {
+      const parts = line.split(line.includes('\t') ? '\t' : ',').map(s => s.trim());
+      if (/^(名称|状态|name|label)$/i.test(parts[0])) continue;
+      if (parts.length < 2 || parts.length > 5 || !parts[0] || parts.slice(1).some(s => s === '' || !Number.isFinite(Number(s)))) return { error: '每行应为：名称、E、Gcorr、阶段、额外修正，以 Tab 或逗号分隔；后面三列可省略。', rows: [] };
+      result.push({ label: parts[0], e: Number(parts[1]), gcorr: Number(parts[2] || 0), stage: Number(parts[3] ?? result.length), correction: Number(parts[4] || 0) });
+    }
+    return { error: result.length ? '' : '请先粘贴数据。', rows: result };
+  }
+  const elements = new Set('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og'.split(' '));
+  const chemicalText = label => textRuns(label).filter(r => r.script !== 'super').map(r => plainDigits(r.text)).join('').replace(/\((?:g|l|s|aq)\)/gi, '').replace(/\*/g, '').replace(/\s/g, '').replace(/[+-]$/, '');
+  function composition(label) {
+    const source = chemicalText(label).replace(/^\+/, ''), total = {};
+    if (!source) return total;
+    for (let part of source.split(/[+·]/)) {
+      const leading = part.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)/), multiplier = leading ? leading[1].split('/').map(Number).reduce((a,b) => a/b) : 1;
+      if (leading) part = part.slice(leading[0].length);
+      let index = 0, valid = true;
+      function amount() { const m = part.slice(index).match(/^\d+(?:\.\d+)?/); if (!m) return 1; index += m[0].length; return Number(m[0]); }
+      function group(nested = false) {
+        const atoms = {};
+        while (valid && index < part.length && part[index] !== ')') {
+          let unit;
+          if (part[index] === '(') { index++; unit = group(true); }
+          else { const m = part.slice(index).match(/^[A-Z][a-z]?/); if (!m || !elements.has(m[0])) { valid = false; break; } index += m[0].length; unit = { [m[0]]: 1 }; }
+          const n = amount(); if (!(n > 0)) valid = false;
+          for (const [atom,count] of Object.entries(unit)) atoms[atom] = (atoms[atom] || 0) + count * n;
+        }
+        if (nested) { if (part[index] !== ')') valid = false; else index++; }
+        return atoms;
+      }
+      const atoms = group();
+      if (!valid || index !== part.length || !Object.keys(atoms).length || !(multiplier > 0)) return null;
+      for (const [atom,count] of Object.entries(atoms)) total[atom] = (total[atom] || 0) + count * multiplier;
+    }
+    return total;
+  }
+  function inferTerms(nodes, refs, previous = null) {
+    const notices = [], ensure = formula => {
+      let ref = refs.find(r => r.formula === formula || refId(r.id) === formula || refId(r.name) === formula);
+      if (!ref) { ref = { id:formula, name:formatDigits(formula,'sub'), formula, syncName:true, e:null, gcorr:null }; refs.push(ref); }
+      return ref.id;
+    };
+    function gases(label) {
+      const parts = label.split('+'), result = new Map();
+      if (!parts.some(p => p.includes('*'))) return result;
+      for (const part of parts.filter(p => !p.includes('*') && p.trim())) {
+        const text = chemicalText(part), leading = text.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)/), n = leading ? leading[1].split('/').map(Number).reduce((a,b) => a/b) : 1;
+        const id = ensure(leading ? text.slice(leading[0].length) : text); result.set(id,(result.get(id)||0)+n);
+      }
+      return result;
+    }
+    for (const node of nodes) {
+      delete node.autoIssue;
+      const atoms = composition(node.label), before = previous ? composition(previous.label) : atoms;
+      if (!atoms || !before || previous?.autoIssue) { node.autoIssue = '需检查化学式'; notices.push(node.label); previous = node; continue; }
+      const explicit = gases(node.label), terms = new Map(previous ? previous.terms.map(t => [t.ref,t.n]) : []);
+      if (previous) for (const [id,n] of gases(previous.label)) terms.set(id,(terms.get(id)||0)-n);
+      for (const [id,n] of explicit) terms.set(id,(terms.get(id)||0)+n);
+      const add = (formula,n) => { if (Math.abs(n)<1e-10) return; const id = ensure(formula); terms.set(id,(terms.get(id)||0)+n); };
+      const delta = atom => (atoms[atom]||0)-(before[atom]||0);
+      add('H2',-delta('H')/2 + delta('O') - 2*delta('C'));
+      add('H2O',-delta('O') + 2*delta('C')); add('N2',-delta('N')/2); add('CO2',-delta('C'));
+      for (const atom of new Set([...Object.keys(atoms),...Object.keys(before)])) if (!['H','O','N','C'].includes(atom) && delta(atom)) {
+        const ref = refs.find(r => { const a = composition(r.formula || r.name); return a && Object.keys(a).length===1 && a[atom]; });
+        if (ref) terms.set(ref.id,(terms.get(ref.id)||0)-delta(atom)/composition(ref.formula || ref.name)[atom]);
+        else { node.autoIssue = '待指定 ' + atom + ' 参考'; notices.push(node.label + '：' + atom); }
+      }
+      node.terms = [...terms].filter(([,n]) => Math.abs(n)>1e-10).map(([ref,n])=>({ref,n})); previous = node;
+    }
+    return { notices, missing: refs.filter(r => !ready(r.e) || !ready(r.gcorr)).map(r=>r.id) };
+  }
+  function referenceStart(system) {
+    const nodes=system.nodes.filter(n=>!n.placeholder).slice().sort((a,b)=>a.stage-b.stage);
+    return nodes.find(n=>n.id===system.termOrigin) || nodes.find(n=>{
+      const parts=n.label.split('+'), ads=parts.some(p=>p.includes('*')) ? parts.filter(p=>p.includes('*')).join('+') : n.label;
+      const atoms=composition(ads); return atoms && Object.keys(atoms).length;
+    }) || nodes[0];
+  }
+  function inferSystemTerms(system,refs) {
+    const nodes=system.nodes.filter(n=>!n.placeholder).slice().sort((a,b)=>a.stage-b.stage), origin=referenceStart(system), index=nodes.indexOf(origin);
+    system.termOrigin=origin.id;
+    const notices=[], apply=(n,previous)=>notices.push(...inferTerms([n],refs,previous).notices);
+    apply(origin,null);
+    let previous=origin;
+    for (const n of nodes.slice(0,index).reverse()) {
+      const atoms=composition(n.label);
+      if (atoms && Object.keys(atoms).length && !n.label.includes('+')) { apply(n,previous); previous=n; }
+      else { n.terms=[]; delete n.autoIssue; if (n.label.includes('+') && atoms) apply(n,null); }
+    }
+    const processed=new Set([origin.id]); previous=origin;
+    for (const n of nodes.slice(index+1)) {
+      const incoming=system.edges.find(e=>e.to===n.id && processed.has(e.from));
+      apply(n,incoming ? nodes.find(item=>item.id===incoming.from) : previous);
+      processed.add(n.id); previous=n;
+    }
+    return {notices,missing:refs.filter(r=>!ready(r.e)||!ready(r.gcorr)).map(r=>r.id)};
+  }
+  root.StepCore = { factor, uid, clone, newHistory, recordHistory, moveHistory, defaults, blank, demo, node, labelVisible, setLabelVisible, patchAnnotations, setSystemName, setSystemColor, exportName, zoomView, branchGroup, orderedNodes, sortTarget, shiftBranch, syncTransitionStages, setBranch, preserveTransition, clearConnections, removeNode, networkStages, reorderNode, branch, edge, connect, insertBlank, removeBlank, horizontalLayout, referenceStart, inferSystemTerms, textRuns, formatRange, formatDigits, formatText, optionText, refId, linkedRef, renameRef, combined, energy, parseTerms, termsText, newSystem, validate, parsePaste, composition, inferTerms };
+  if (typeof module !== 'undefined') module.exports = root.StepCore;
+})(globalThis);
+
+</script>
+<script>
+'use strict';
+function StepCards(options) {
+  const C = StepCore, $ = id => document.getElementById(id), dialog = $('cards-dialog'), board = $('cards-board'), scroll = $('cards-scroll'), svg = $('cards-links'), NS = 'http://www.w3.org/2000/svg';
+  const width = 210, height = 116, esc = options.esc, rich = options.rich;
+  let scope = 'all', selected = null, gesture = null, wire = null, positions = new Map();
+  const systems = () => options.project().systems.filter(s => scope === 'all' || scope === s.id);
+  const system = sid => options.project().systems.find(s => s.id === sid);
+  const node = (sid,id) => system(sid)?.nodes.find(n => n.id === id);
+  const selectedCards = () => selected?.kind === 'node' ? selected.nodes || [{sid:selected.sid,id:selected.id}] : [];
+  const isSelected = id => selectedCards().some(item => item.id === id);
+  function selectCards(items) { const last=items.at(-1);selected=last ? {kind:'node',...last,nodes:items} : null; }
+  function movingItems() {
+    const nodes=new Map();
+    for (const item of selectedCards()) for (const n of C.branchGroup(system(item.sid),item.id)) nodes.set(n.id,n);
+    return [...nodes.values()].map(n=>({n,...positions.get(n.id),originalX:n.cardX,originalY:n.cardY}));
+  }
+  const point = event => { const b = board.getBoundingClientRect(); return {x:event.clientX-b.left,y:event.clientY-b.top}; };
+  const element = (tag,attrs,parent=svg) => { const e = document.createElementNS(NS,tag); for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v); parent.appendChild(e); return e; };
+  function defaults() {
+    const map = new Map(); let row = 0;
+    for (const s of systems()) {
+      const nodes=C.orderedNodes(s), stages=[...new Set(nodes.map(n=>n.stage))].sort((a,b)=>a-b); let rows=1;
+      for (const [column,stage] of stages.entries()) {
+        const items=nodes.filter(n=>n.stage===stage);rows=Math.max(rows,items.length);
+        items.forEach((n,i)=>map.set(n.id,{x:60+column*270,y:60+(row+i)*180}));
+      }
+      row += rows+1;
+    }
+    return map;
+  }
+  function commit() { for (const s of systems()) for (const n of s.nodes) { const p=positions.get(n.id); if(p){n.cardX=p.x;n.cardY=p.y;} } options.changed(); }
+  function drawLinks() {
+    svg.innerHTML = '';
+    const defs = element('defs',{}), marker = element('marker',{id:'cards-arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerUnits:'userSpaceOnUse',markerWidth:11,markerHeight:11,orient:'auto-start-reverse'},defs);
+    element('path',{d:'M0 0L10 5L0 10Z',fill:'context-stroke'},marker);
+    for (const s of systems()) for (const e of s.edges) {
+      const a = positions.get(e.from), b = positions.get(e.to); if (!a || !b) continue;
+      const x1=a.x+width+7,y1=a.y+height/2,x2=b.x-7,y2=b.y+height/2,bend=Math.max(65,Math.abs(x2-x1)*.45);
+      const d=`M${x1} ${y1}C${x1+bend} ${y1} ${x2-bend} ${y2} ${x2} ${y2}`, attrs={'data-card-edge':e.id,'data-sys':s.id};
+      element('path',{d,fill:'none',stroke:'transparent','stroke-width':18,...attrs});
+      element('path',{d,fill:'none',stroke:selected?.kind==='edge' && selected.id===e.id ? '#168c72' : s.color,'stroke-width':selected?.id===e.id ? 4 : 2.2,'marker-end':'url(#cards-arrow)',...attrs});
+      if (e.ts) { const t=element('text',{x:(x1+x2)/2,y:(y1+y2)/2-8,'text-anchor':'middle',fill:s.color,'font-size':12,...attrs});t.textContent='TS'; }
+    }
+    if (wire) {
+      const a=positions.get(wire.id), b=wire.point || {x:a.x+width+80,y:a.y+height/2};
+      element('path',{d:`M${a.x+width+7} ${a.y+height/2}C${a.x+width+80} ${a.y+height/2} ${b.x-65} ${b.y} ${b.x} ${b.y}`,fill:'none',stroke:'#168c72','stroke-width':2,'stroke-dasharray':'6 4','pointer-events':'none'});
+    }
+  }
+  function render() {
+    if (!dialog.open) return;
+    const p=options.project(), choices=[['all','全部体系'],...p.systems.map(s=>[s.id,s.name])];
+    if (!choices.some(([id])=>id===scope)) scope='all';
+    $('cards-system').innerHTML=choices.map(([id,name])=>`<option value="${id}" ${id===scope?'selected':''}>${esc(C.optionText(name))}</option>`).join('');
+    if (selected?.kind==='node') selectCards(selectedCards().filter(item=>node(item.sid,item.id) && (scope==='all' || scope===item.sid)));
+    else if (selected && !system(selected.sid)?.edges.some(e=>e.id===selected.id)) selected=null;
+    if (wire && !node(wire.sid,wire.id)) wire=null;
+    const base=defaults(), previous=positions;positions=new Map();
+    $('cards-nodes').innerHTML=systems().map(s=>C.orderedNodes(s).map(n=>{
+      const b=previous.get(n.id) || base.get(n.id), pos={x:n.cardX ?? b.x,y:n.cardY ?? b.y};positions.set(n.id,pos);
+      const energy=C.energy(p,s,n).value*C.factor[p.style.unit], value=Number.isFinite(energy)?energy.toFixed(p.style.decimals):'—';
+      const raw=p.inputMode==='raw' ? `<span>E ${n.e ?? '—'}</span><span>Gcorr ${n.gcorr ?? '—'}</span>` : '';
+      return `<article class="network-card ${isSelected(n.id)?'selected':''} ${wire?.id===n.id?'wire-source':''}" data-card-node="${n.id}" data-sys="${s.id}" style="left:${pos.x}px;top:${pos.y}px;--system-color:${s.color}"><div class="network-system"><span class="color-dot" style="background:${s.color}"></span>${rich(s.name)}<small>阶段 ${n.stage}</small></div><strong class="network-name">${n.placeholder?'空白状态':rich(n.label)}</strong><div class="network-energy">${n.placeholder?'占位':`相对 G ${value} ${esc(p.style.unit)}`}${n.branchOf?`<span class="network-parent">↳ ${rich(node(s.id,n.branchOf).label)}</span>`:''}</div><div class="network-raw">${raw}</div>${n.placeholder?'':`<button class="card-port in" data-card-port="in" aria-label="${esc(n.label)} 连入"></button><button class="card-port out" data-card-port="out" aria-label="${esc(n.label)} 连出"></button>`}</article>`;
+    }).join('')).join('');
+    board.style.width=Math.max(scroll.clientWidth,1250,...[...positions.values()].map(p=>p.x+width+150))+'px';
+    board.style.height=Math.max(scroll.clientHeight,900,...[...positions.values()].map(p=>p.y+height+150))+'px';
+    $('cards-remove').disabled=!selected || selectedCards().length>1;$('cards-undo').disabled=$('undo').disabled;$('cards-redo').disabled=$('redo').disabled;
+    $('cards-status').textContent=wire?'选择目标卡片 · Esc 取消':`${positions.size} 个状态${selectedCards().length ? ' · 已选 '+selectedCards().length+' 个' : ''}`;
+    drawLinks();
+  }
+  function select(kind,sid,id) { selected={kind,sid,id};render(); }
+  function connect(sid,id) {
+    if (!wire || id===wire.id) return;
+    if (sid!==wire.sid) { options.toast('请连接同一体系内的状态');return; }
+    const s=system(sid), result=C.connect(s,wire.id,id); if(result.error){options.toast(result.error);return;}
+    wire=null;
+    const error=$('cards-stages').checked?C.networkStages(s).error:'';
+    selected={kind:'edge',sid,id:result.edge.id};commit();if(error)options.toast(error);
+  }
+  function stopGesture(save=true) {
+    if (!gesture) return; const g=gesture;gesture=null;board.classList.remove('cards-panning');
+    if (board.hasPointerCapture(g.pointer)) board.releasePointerCapture(g.pointer);
+    if (g.kind==='move' && g.moved) {
+      if (!save) for(const item of g.items){if(item.originalX===undefined)delete item.n.cardX;else item.n.cardX=item.originalX;if(item.originalY===undefined)delete item.n.cardY;else item.n.cardY=item.originalY;}
+      if(save)commit();else { positions=new Map();render(); }
+    } else if (g.kind==='move' && save) { selectCards([g.clicked]);render(); }
+  }
+  board.addEventListener('pointerdown',event=>{
+    if(event.button!==0 || event.target.closest('input,select,textarea'))return;
+    const card=event.target.closest('[data-card-node]'), port=event.target.closest('[data-card-port]'), edge=event.target.closest('[data-card-edge]');
+    if(card && (event.ctrlKey || event.metaKey)){
+      wire=null;const item={sid:card.dataset.sys,id:card.dataset.cardNode}, items=selectedCards();
+      selectCards(isSelected(item.id) ? items.filter(n=>n.id!==item.id) : [...items,item]);
+      render();event.preventDefault();board.focus({preventScroll:true});return;
+    }
+    if(card && wire && (wire.id!==card.dataset.cardNode || wire.sid!==card.dataset.sys)){connect(card.dataset.sys,card.dataset.cardNode);event.preventDefault();return;}
+    if(port?.dataset.cardPort==='out'){
+      selectCards([{sid:card.dataset.sys,id:card.dataset.cardNode}]);
+      wire={sid:card.dataset.sys,id:card.dataset.cardNode,point:point(event)};gesture={kind:'wire',pointer:event.pointerId};render();board.setPointerCapture(event.pointerId);event.preventDefault();return;
+    }
+    if(edge){wire=null;select('edge',edge.dataset.sys,edge.dataset.cardEdge);event.preventDefault();return;}
+    if(card){
+      const clicked={sid:card.dataset.sys,id:card.dataset.cardNode};if(!isSelected(clicked.id))selectCards([clicked]);
+      gesture={kind:'move',items:movingItems(),clicked,start:point(event),pointer:event.pointerId,moved:false};render();
+    }else{wire=null;selected=null;render();gesture={kind:'pan',x:event.clientX,y:event.clientY,left:scroll.scrollLeft,top:scroll.scrollTop,pointer:event.pointerId};board.classList.add('cards-panning');}
+    board.setPointerCapture(event.pointerId);event.preventDefault();board.focus({preventScroll:true});
+  });
+  board.addEventListener('pointermove',event=>{
+    if(wire){wire.point=point(event);drawLinks();}
+    if(!gesture || gesture.pointer!==event.pointerId)return;
+    if(gesture.kind==='pan'){scroll.scrollLeft=gesture.left-(event.clientX-gesture.x);scroll.scrollTop=gesture.top-(event.clientY-gesture.y);return;}
+    if(gesture.kind!=='move')return;
+    const p=point(event);let dx=p.x-gesture.start.x,dy=p.y-gesture.start.y;
+    if(!gesture.moved && Math.hypot(dx,dy)<4)return;gesture.moved=true;
+    dx=Math.max(20-Math.min(...gesture.items.map(i=>i.x)),Math.min(15000-Math.max(...gesture.items.map(i=>i.x)),dx));
+    dy=Math.max(20-Math.min(...gesture.items.map(i=>i.y)),Math.min(15000-Math.max(...gesture.items.map(i=>i.y)),dy));
+    for(const item of gesture.items){item.n.cardX=Math.round(item.x+dx);item.n.cardY=Math.round(item.y+dy);positions.set(item.n.id,{x:item.n.cardX,y:item.n.cardY});const el=$('cards-nodes').querySelector(`[data-card-node="${item.n.id}"]`);el.style.left=item.n.cardX+'px';el.style.top=item.n.cardY+'px';}
+    drawLinks();
+  });
+  board.addEventListener('pointerup',event=>{
+    if(gesture?.kind==='wire'){const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-card-node]');if(target)connect(target.dataset.sys,target.dataset.cardNode);}
+    stopGesture();
+  });
+  board.addEventListener('pointercancel',()=>stopGesture(false));
+  board.addEventListener('contextmenu',event=>{
+    const card=event.target.closest('[data-card-node]'),edge=event.target.closest('[data-card-edge]');if(!card&&!edge)return;
+    event.preventDefault();stopGesture(false);wire=null;
+    const context=card?{kind:'node',sid:card.dataset.sys,id:card.dataset.cardNode}:{kind:'edge',sid:edge.dataset.sys,id:edge.dataset.cardEdge};
+    select(context.kind,context.sid,context.id);options.context(context,event);
+  });
+  board.addEventListener('dblclick',event=>{const card=event.target.closest('[data-card-node]');if(card && !event.ctrlKey && !event.metaKey && !event.target.closest('[data-card-port]')){close();options.edit(card.dataset.sys,card.dataset.cardNode);}});
+  dialog.addEventListener('cancel',event=>{if(wire||gesture){event.preventDefault();stopGesture(false);wire=null;render();}});
+  dialog.addEventListener('keydown',event=>{
+    if((event.ctrlKey || event.metaKey) && event.key.toLowerCase()==='a' && !event.target.closest('input,select,textarea')){event.preventDefault();event.stopPropagation();wire=null;selectCards(systems().flatMap(s=>s.nodes.map(n=>({sid:s.id,id:n.id}))));render();}
+    if(event.key==='Delete' && selected && selectedCards().length<=1 && !event.target.closest('input,select,textarea')){event.preventDefault();options.remove(selected);}
+    if(event.key==='Escape' && wire){event.preventDefault();stopGesture(false);wire=null;render();}
+  });
+  $('cards-system').onchange=event=>{scope=event.target.value;wire=null;selected=null;render();scroll.scrollTo(0,0);};
+  $('cards-arrange').onclick=()=>{positions=defaults();for(const s of systems())for(const n of s.nodes){n.cardX=positions.get(n.id).x;n.cardY=positions.get(n.id).y;}commit();scroll.scrollTo(0,0);};
+  $('cards-clear').onclick=()=>{stopGesture(false);wire=null;selected=null;let retained=0;for(const s of systems())retained+=C.clearConnections(s,options.project().annotations);commit();options.toast(retained?'连接已清空，过渡态保留为独立卡片 · Ctrl+Z 撤销':'连接已清空 · Ctrl+Z 撤销');};
+  $('cards-remove').onclick=()=>{if(selected)options.remove(selected);};
+  $('cards-undo').onclick=()=>options.undo();$('cards-redo').onclick=()=>options.redo();
+  $('cards-close').onclick=close;
+  function close(){stopGesture();wire=null;if(dialog.open)dialog.close();}
+  function reset(){positions=new Map();wire=null;stopGesture(false);}
+  function open(){scope='all';selected=null;wire=null;positions=new Map();dialog.showModal();render();scroll.scrollTo(0,0);}
+  return {open,close,render,reset};
+}
+
+</script>
+<script>
+(function (root) {
+  'use strict';
+  async function save(makeBlob, name, mime) {
+    if (!root.showSaveFilePicker) return { status: 'unsupported' };
+    try {
+      const extension = '.' + name.split('.').at(-1);
+      const handle = await root.showSaveFilePicker({ startIn: 'desktop', suggestedName: name, types: [{ description: extension.slice(1).toUpperCase(), accept: { [mime]: [extension] } }] });
+      const blob = await makeBlob(), stream = await handle.createWritable();
+      await stream.write(blob); await stream.close();
+      return { status: 'saved' };
+    } catch (error) {
+      return { status: error.name === 'AbortError' ? 'cancelled' : 'error', message: error.message };
+    }
+  }
+  root.StepFiles = { save };
+})(globalThis);
+
+</script>
+<script>
+'use strict';
+const C = StepCore, $ = id => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const rich = text => C.textRuns(String(text)).map(r => r.script ? `<${r.script === 'sub' ? 'sub' : 'sup'}>${esc(r.text)}</${r.script === 'sub' ? 'sub' : 'sup'}>` : esc(r.text)).join('');
+const termsLabel = terms => terms.map(t => `${t.n >= 0 ? '+' : '−'}${Math.abs(t.n)} × ${project.refs.find(r => r.id === t.ref)?.name || t.ref}`).join(' ');
+const blankEntry = document.querySelector('meta[name="stepplot-start"]')?.content === 'blank';
+const storageKey = 'stepplot-recovery-v2';
+let project = C.blank(), activeSys = '', tab = 'states', inspectTab = 'object', selection = null;
+let history = C.newHistory(), saveTimer, toastTimer, confirmAction, drag = null, drawing = {}, annotationMeta = new Map();
+let connectionSystem = '', autoConnect = true, fieldSerial = 0, recovery = null;
+let exported = JSON.stringify(project), dirty = false, inlineEdit = null, paneDrag = null;
+let colorEdit = null, colorSerial = 0;
+let view = { zoom: 1, x: 0, y: 0 }, canvasEdit = null;
+let stateDrag = null, stateDragFrame = 0, suppressStateClick = false;
+let stateContext = null, branchTarget = null, cards = null;
+const selectedKeys = () => selection?.kind === 'annotation' ? selection.keys || [selection.key] : [];
+try {
+  const saved = localStorage.getItem(storageKey) || localStorage.getItem(blankEntry ? 'stepplot-blank-v1' : 'stepplot-v1');
+  if (saved) { const p = JSON.parse(saved); if (!C.validate(p)) recovery = p; }
+} catch { /* 存储不可用时仍可手动导出。 */ }
+const sys = id => project.systems.find(s => s.id === (id || activeSys));
+const state = (s, id) => s?.nodes.find(n => n.id === id);
+const realNodes = s => s.nodes.filter(n=>!n.placeholder);
+const link = (s, id) => s?.edges.find(e => e.id === id);
+const valueText = (v, digits = project.style.decimals, signed = false) => {
+  if (!Number.isFinite(v)) return '—';
+  const rounded = Number(v.toFixed(digits)); return (signed && rounded > 0 ? '+' : '') + rounded.toFixed(digits);
+};
+const display = v => typeof v === 'number' && Number.isFinite(v) ? v * C.factor[project.style.unit] : NaN;
+function toast(message) { $('toast').textContent = message; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3500); }
+function record(group = '') {
+  C.recordHistory(history, JSON.stringify(project), group);
+  $('undo').disabled = history.index <= 0; $('redo').disabled = history.index >= history.entries.length - 1;
+}
+function endColorEdit() { colorEdit = null; history.group = ''; }
+function colorGroup(input) {
+  if (colorEdit?.input !== input) colorEdit = { input, group: 'color' + ++colorSerial };
+  return colorEdit.group;
+}
+function cacheNow() {
+  clearTimeout(saveTimer);
+  if (!project.systems.length && !dirty) return;
+  try { localStorage.setItem(storageKey, JSON.stringify(project)); } catch { toast('恢复缓存不可用，请导出工程'); }
+}
+function persist() {
+  dirty = JSON.stringify(project) !== exported;
+  $('save-status').textContent = dirty ? '未导出' : project.systems.length ? '已导出' : '空白工程';
+  clearTimeout(saveTimer); saveTimer = setTimeout(cacheNow, 350);
+}
+function changed(panels = true, group = '') { record(group); persist(); if (panels) renderPanels(); renderPlot(); }
+function loadProject(p, restored = false) {
+  cards?.close(); closeStateMenu();
+  endColorEdit();
+  finishCanvasText(false); view = { zoom: 1, x: 0, y: 0 }; $('zoom').value = 'fit';
+  project = p; project.style = { ...C.defaults(), ...project.style }; project.refs.forEach(r => r.syncName = C.linkedRef(r));
+  if (project.title === '反应自由能图') project.title = 'Free energy diagram';
+  if (project.annotations.title?.text === '反应自由能图') delete project.annotations.title.text;
+  if (project.xLabel === '反应坐标') project.xLabel = 'Reaction coordinate';
+  project.systems.forEach(s => C.setSystemName(project, s, s.name));
+  project.energyMode = 'G'; if (project.yLabel === 'Relative electronic energy') project.yLabel = 'Relative free energy';
+  activeSys = p.systems[0]?.id || ''; selection = null; inlineEdit = null; tab = 'states'; inspectTab = 'object';
+  exported = restored ? '' : JSON.stringify(project); history = C.newHistory();
+  $('recovery-bar').hidden = true; record(); persist(); renderAll();
+}
+function openInspector() { $('inspector').classList.add('open'); const workspace=document.querySelector('.workspace'); workspace.classList.remove('right-closed'); workspace.classList.add('inspector-open'); }
+function closeInspector() { $('inspector').classList.remove('open'); const workspace = document.querySelector('.workspace'); workspace.classList.remove('inspector-open'); workspace.classList.add('right-closed'); }
+function selectObject(kind, id, systemId = activeSys, key = '', reveal = true) {
+  if (kind === 'annotation') { selectAnnotations([key], reveal); return; }
+  selection = { kind, id, sys: systemId, key }; if (systemId) activeSys = systemId;
+  inspectTab = 'object'; if (reveal) openInspector();
+  document.querySelectorAll('[data-inspect]').forEach(b => b.classList.toggle('active', b.dataset.inspect === inspectTab));
+  $('inspector-content').innerHTML = objectPanel(); updateSelectionClasses(); renderSelection();
+}
+function selectAnnotations(keys, reveal = false) {
+  keys = [...new Set(keys)].filter(key => annotationMeta.has(key));
+  const key = keys.at(-1), meta = annotationMeta.get(key);
+  selection = key ? { kind: 'annotation', id: '', key, keys, sys: meta.opts.owner?.sys || '' } : null;
+  if (selection?.sys) activeSys = selection.sys;
+  inspectTab = 'object'; if (reveal) openInspector();
+  $('inspector-content').innerHTML = objectPanel(); updateSelectionClasses(); renderSelection();
+}
+function updateTextToolbar() {
+  const metas = selectedKeys().map(key => annotationMeta.get(key)).filter(Boolean), same = key => metas.length && metas.every(m => m[key] === metas[0][key]) ? metas[0][key] : '';
+  $('text-toolbar').querySelectorAll('button,input,select').forEach(el => el.disabled = !metas.length);
+  $('text-count').textContent = metas.length ? '已选 ' + metas.length + ' 项' : 'Ctrl + 单击多选';
+  if (document.activeElement !== $('text-font')) $('text-font').value = same('font');
+  if (document.activeElement !== $('text-size')) $('text-size').value = same('fontSize');
+  if (document.activeElement !== $('text-color')) $('text-color').value = same('resolvedColor') || '#293f4c';
+  $('text-color').classList.toggle('mixed', Boolean(metas.length && !same('resolvedColor')));
+  $('text-bold').classList.toggle('active', Boolean(same('bold')));
+  $('text-bold').setAttribute('aria-pressed', String(Boolean(same('bold'))));
+}
+function applySelectedStyle(patch, group = '') {
+  if (!selectedKeys().length) return;
+  C.patchAnnotations(project, selectedKeys(), patch); changed(false, group);
+  if (inspectTab === 'object') $('inspector-content').innerHTML = objectPanel();
+}
+function setTextHidden(keys, hidden) {
+  C.patchAnnotations(project, keys, { hidden });
+  for (const s of project.systems) {
+    for (const n of s.nodes) if (keys.includes('node:' + n.id)) C.setLabelVisible(project, n, !hidden);
+    for (const e of s.edges) if (!hidden && keys.includes('delta:' + e.id)) e.showDelta = true;
+  }
+}
+function beginCanvasText(key) {
+  finishCanvasText(); selectAnnotations([key]);
+  const meta = annotationMeta.get(key), box = meta.g.getBoundingClientRect(), card = document.querySelector('.canvas-card').getBoundingClientRect();
+  canvasEdit = { key, original: String(project.annotations[key]?.text ?? meta.text) };
+  const editor = $('canvas-editor'), width = Math.min(330, card.width - 20);
+  editor.style.width = width + 'px'; editor.style.left = Math.max(10, Math.min(card.width - width - 10, box.left - card.left)) + 'px';
+  editor.style.top = Math.max(8, Math.min(card.height - 115, box.bottom - card.top + 6)) + 'px';
+  editor.hidden = false; $('canvas-text').value = canvasEdit.original;
+  $('canvas-text').style.fontFamily = meta.font; $('canvas-text').focus(); $('canvas-text').select();
+}
+function finishCanvasText(commit = true) {
+  if (!canvasEdit) return;
+  const { key, original } = canvasEdit, text = $('canvas-text').value; canvasEdit = null; $('canvas-editor').hidden = true;
+  if (!commit || text === original) return;
+  if (key.startsWith('legend:')) C.setSystemName(project,sys(key.slice(7)),text);
+  else (project.annotations[key] ||= {}).text = text;
+  if (key.startsWith('node:')) { const owner = annotationMeta.get(key).opts.owner; C.setLabelVisible(project,state(sys(owner.sys),owner.id),Boolean(text.trim())); }
+  changed(false);
+  const input = $('inspector-content').querySelector('[data-edit="annotation"][data-field="text"]'); if (input) input.value = text;
+}
+const formatButtons = '<div class="format-bar"><button type="button" data-format="sub" title="下标 · 选中文字或全部数字 · Ctrl+=">x₂</button><button type="button" data-format="super" title="上标 · 选中文字或全部数字 · Ctrl+Shift+=">x²</button></div>';
+function field(label, value, scope, key, options = {}) {
+  const inputId = 'field-' + fieldSerial++;
+  const data = `id="${inputId}" aria-label="${esc(label)}" data-edit="${scope}" data-field="${key}" data-id="${options.id || ''}" data-sys="${options.sys || activeSys}"`;
+  const extra = options.extra || '';
+  let input;
+  if (options.options) input = `<select ${data}>${options.options.map(([v, t]) => `<option value="${esc(v)}" ${String(value) === String(v) ? 'selected' : ''}>${esc(C.optionText(t))}</option>`).join('')}</select>`;
+  else if (options.textarea) input = `<textarea ${data} rows="${options.rows || 2}" ${extra}>${esc(value)}</textarea>`;
+  else input = `<input ${data} type="${options.type || 'text'}" value="${esc(value)}" ${options.type === 'number' ? 'step="any"' : ''} ${extra}>`;
+  const formatted = options.format !== false && scope !== 'system' && !options.options && !options.type && ['label', 'name', 'title', 'subtitle', 'xLabel', 'yLabel', 'note', 'text'].includes(key);
+  const toolbar = formatted ? formatButtons : '';
+  return `<div class="field"><label for="${inputId}">${label}</label>${input}${toolbar}</div>`;
+}
+const numeric = (label, value, scope, key, options = {}) => field(label, value, scope, key, { ...options, type: 'number' });
+function check(label, value, scope, key, options = {}) { return `<label class="check"><input type="checkbox" data-edit="${scope}" data-field="${key}" data-id="${options.id || ''}" data-sys="${options.sys || activeSys}" ${value ? 'checked' : ''}>${label}</label>`; }
+function button(label, action, id = '', cls = '') { return `<button class="${cls}" data-action="${action}" data-id="${id}">${label}</button>`; }
+function renderPanels() {
+  if (!sys() && project.systems.length) activeSys = project.systems[0].id;
+  document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('[data-inspect]').forEach(b => b.classList.toggle('active', b.dataset.inspect === inspectTab));
+  $('data-content').innerHTML = tab === 'states' ? statesPanel() : tab === 'refs' ? refsPanel() : edgesPanel();
+  $('inspector-content').innerHTML = inspectTab === 'style' ? stylePanel() : objectPanel();
+}
+function updateSelectionClasses() {
+  document.querySelectorAll('.system-group').forEach(el => el.classList.toggle('active', el.dataset.sys === activeSys));
+  document.querySelectorAll('.state-row,.edge-card').forEach(el => el.classList.toggle('active', el.dataset.id === selection?.id));
+}
+function beginNameEdit(el) {
+  if (inlineEdit) return;
+  const kind = el.dataset.rename, id = el.dataset.id, sid = el.closest('[data-sys]').dataset.sys;
+  const target = kind === 'system' ? sys(id) : state(sys(sid),id), key = kind === 'system' ? 'name' : 'label';
+  inlineEdit = { el, target, key, original: target[key] };
+  el.innerHTML = `<span class="field inline-editor"><input type="text" aria-label="${kind === 'system' ? '体系名称' : '状态名称'}（左侧）" data-edit="${kind}" data-field="${key}" data-id="${id}" data-sys="${sid}" value="${esc(target[key])}">${kind === 'node' ? formatButtons : ''}</span>`;
+  const input = el.querySelector('input'); input.focus(); input.select();
+}
+function finishNameEdit(cancel = false) {
+  if (!inlineEdit) return;
+  const {target,key,original} = inlineEdit; inlineEdit = null;
+  if (cancel) target[key] = original;
+  if (key === 'name') C.setSystemName(project, target, target.name);
+  changed();
+}
+function compactEnergy(label,value,key,n,s) {
+  return `<label class="energy-input"><input type="number" step="any" aria-label="${esc(n.label)} ${label}" data-edit="node" data-field="${key}" data-id="${n.id}" data-sys="${s.id}" value="${value ?? ''}"><span>${label}/eV</span></label>`;
+}
+const stateGrip = n => `<span class="state-grip" data-reorder="${n.id}" role="button" tabindex="0" aria-label="拖动调整顺序：${esc(n.placeholder ? '空白状态' : n.label)}" title="拖动排序 · Alt+↑/↓">⠿</span>`;
+function stateDepth(s,n) { let depth = 0; while (n.branchOf) { depth++; n = state(s,n.branchOf); } return Math.min(depth,3); }
+function statesPanel() {
+  let h = `<div class="input-mode">${field('输入方式', project.inputMode, 'project', 'inputMode', { options: [['raw','E + Gcorr'],['relative','相对能']] })}${button('＋ 体系','add-system','','mini')}</div>${button('▦ 卡片模式','open-cards','','full mini cards-open')}`;
+  h += project.systems.map(s => `<section class="system-group ${s.id === activeSys ? 'active' : ''}" data-sys="${s.id}"><div class="system-row" data-action="select-system" data-id="${s.id}">${button(s.collapsed ? '▸' : '▾','fold-system',s.id,'fold')}<input aria-label="显示 ${esc(s.name)}" type="checkbox" data-edit="system" data-field="visible" data-id="${s.id}" ${s.visible ? 'checked' : ''}><input class="system-color" type="color" aria-label="体系整体颜色：${esc(s.name)}" title="整体颜色：台阶、图例和文字" value="${s.color}" data-edit="system" data-field="color" data-id="${s.id}" data-sys="${s.id}"><span class="name" data-rename="system" data-id="${s.id}" data-system-name="${s.id}" title="双击改名">${rich(s.name)}</span><small>${s.nodes.length}</small></div>${s.collapsed ? '' : `<div class="system-body"><div class="system-tools">${project.inputMode === 'raw' ? field('归零参照',s.baseline,'system','baseline',{id:s.id,sys:s.id,options:realNodes(s).map(n=>[n.id,n.label])}) : ''}${button('粘贴','paste','','mini')}</div>${C.orderedNodes(s).map(n => {
+    if (n.placeholder) return `<div class="state-row blank-state ${selection?.id===n.id ? 'active' : ''}" data-action="select-node" data-id="${n.id}">${stateGrip(n)}<span class="state-index">${n.stage}</span><span>空白状态</span>${button('×','remove-blank',n.id,'mini')}</div>`;
+    const g=C.energy(project,s,n);
+    const inputs=project.inputMode === 'raw' ? compactEnergy('E',n.e,'e',n,s)+compactEnergy('Gcorr',n.gcorr,'gcorr',n,s) : compactEnergy('相对能',n.relative,'relative',n,s);
+    return `<div class="state-row ${n.branchOf ? 'branch-row' : ''} ${selection?.id === n.id ? 'active' : ''}" style="--branch-depth:${stateDepth(s,n)}" data-action="select-node" data-id="${n.id}"><div class="state-top">${stateGrip(n)}<span class="state-index" data-node-stage="${n.id}">${n.stage}</span><span class="state-name" data-rename="node" data-id="${n.id}" data-node-name="${n.id}" title="双击改名">${rich(n.label)}</span><label class="label-toggle" title="显示名称"><input type="checkbox" aria-label="显示名称：${esc(n.label)}" data-edit="node" data-field="showLabel" data-id="${n.id}" data-sys="${s.id}" ${C.labelVisible(project,n) ? 'checked' : ''}>名称</label><span class="energy-tag" data-energy="${n.id}">${valueText(display(g.value))}</span></div>${n.branchOf ? `<div class="branch-parent">↳ ${rich(state(s,n.branchOf).label)}</div>` : ''}<div class="state-raw">${inputs}</div>${n.terms.length ? `<div class="state-terms" data-node-terms="${n.id}">${rich(termsLabel(n.terms))}</div>` : ''}${n.autoIssue ? `<div class="pending">${esc(n.autoIssue)} ${button('手动设置','manual-terms',n.id,'mini')}</div>` : ''}</div>`;
+  }).join('')}<div class="button-row">${button('＋ 状态','add-node')}${button('⑂ 分支','add-branch')}<details class="more-actions"><summary aria-label="更多状态操作" title="更多状态操作">▾</summary><div>${button('＋ 空白状态','insert-blank')}</div></details></div></div>`}</section>`).join('');
+  if (project.systems.length) h += `<label class="check auto-connect"><input type="checkbox" data-ui="auto-connect" ${autoConnect ? 'checked' : ''}>新增状态自动连接</label>`;
+  return h;
+}
+function refsPanel() {
+  return `<div class="section-title">小分子 <span>${button('粘贴','paste-refs','','mini')} ${button('＋ 添加','add-ref','','mini')}</span></div>` + project.refs.map(r => `<div class="ref-card"><div class="ref-head"><strong data-ref-name="${r.id}">${rich(r.name)}</strong>${button('移出','remove-ref',r.id,'mini danger')}</div>${check('ID 与名称同步',C.linkedRef(r),'ref','syncName',{id:r.id})}<div class="form-row">${field('ID',r.id,'ref-id','id',{id:r.id})}${field('显示名称',r.name,'ref-name','name',{id:r.id})}</div><div class="form-row">${numeric('E / eV',r.e,'ref','e',{id:r.id})}${numeric('Gcorr / eV',r.gcorr,'ref','gcorr',{id:r.id})}</div><div class="calc-row"><span>G / eV</span><span data-ref-g="${r.id}">${valueText(typeof r.e === 'number' && typeof r.gcorr === 'number' ? r.e+r.gcorr : NaN,6)}</span></div></div>`).join('');
+}
+function edgesPanel() {
+  const s = sys(); if (!s) return '<div class="empty">先添加一个体系。</div>';
+  return `${field('体系',s.id,'ui','activeSystem',{options:project.systems.map(item=>[item.id,item.name])})}<div class="section-title"><span>反应连接</span>${button('＋ 连接', 'add-edge', '', 'mini')}</div>` + s.edges.map(e => {
+    const from = state(s, e.from), to = state(s, e.to), delta = C.energy(project, s, to).value - C.energy(project, s, from).value;
+    return `<div class="edge-card ${selection?.id === e.id ? 'active' : ''}" data-action="select-edge" data-id="${e.id}"><strong>${rich(from.label)} → ${rich(to.label)}</strong><small>Δ${project.energyMode} = ${valueText(display(delta), project.style.decimals, true)} ${esc(project.style.unit)}${e.ts ? '　· 含过渡态' : ''}</small></div>`;
+  }).join('');
+}
+function ownerLabel(owner) {
+  if (!owner) return '画布';
+  const s=sys(owner.sys);
+  if (owner.kind==='system') return rich(s.name)+' · 图例';
+  if (owner.kind==='node') { const n=state(s,owner.id); return rich(s.name)+' / 阶段 '+n.stage+' · '+rich(n.label); }
+  const e=link(s,owner.id); return rich(s.name)+' / '+rich(state(s,e.from).label)+' → '+rich(state(s,e.to).label)+' · 连线';
+}
+function annotationColors(meta,a) {
+  const swatches=['#293f4c','#277da8','#e48b32','#3d997a','#8a61b1','#d56172'];
+  return `<div class="color-swatches">${swatches.map(color=>`<button type="button" aria-label="文字颜色 ${color}" title="${color}" style="--swatch:${color}" data-action="annotation-color" data-id="${color}"></button>`).join('')}${button('默认','annotation-default-color','','mini')}</div><div class="system-colors">${project.systems.map(s=>`<button class="mini ${a.colorSystem===s.id ? 'active' : ''}" data-action="annotation-system-color" data-id="${s.id}"><span class="color-dot" style="background:${s.color}"></span>跟随 ${rich(s.name)}</button>`).join('')}</div>`;
+}
+function objectPanel() {
+  const s = sys(selection?.sys), n = selection?.kind === 'node' ? state(s, selection.id) : null, e = selection?.kind === 'edge' ? link(s, selection.id) : null;
+  if (selection?.kind === 'legend') return legendPanel();
+  if (selection?.kind === 'annotation') {
+    if (selectedKeys().length > 1) return `<div class="section-title">已选 ${selectedKeys().length} 项文字</div>${annotationColors(null,{})}${check('隐藏所选文字',selectedKeys().every(key=>annotationMeta.get(key).hidden),'annotation-selection','hidden')}${button('恢复默认样式','reset-annotation','','full')}`;
+    const meta = annotationMeta.get(selection.key); if (!meta) return '<div class="empty">该标注当前未显示。</div>';
+    const a = project.annotations[selection.key] || {}, nameNode = selection.key.startsWith('node:') ? state(sys(meta.opts.owner.sys), meta.opts.owner.id) : null;
+    return `${selection.key.startsWith('legend:') ? systemColorField(s) : ''}<div class="section-title">文字与数字</div><div class="owner-info"><span>跟随：${ownerLabel(meta.opts.owner)}</span>${meta.opts.owner ? button('定位','select-owner','','mini') : ''}</div>${field(selection.key.startsWith('legend:') ? '体系 / 图例名称' : '显示内容', a.text ?? meta.text, 'annotation', 'text', { id: selection.key, textarea: true })}<div class="form-row">${numeric('字号', a.size || meta.size, 'annotation', 'size', { id: selection.key, extra: 'min="8" max="80"' })}${field('颜色',meta.resolvedColor,'annotation','color',{id:selection.key,type:'color'})}</div>${annotationColors(meta,a)}<div class="form-row">${numeric('水平偏移 / px', a.dx || 0, 'annotation', 'dx', { id: selection.key })}${numeric('垂直偏移 / px', a.dy || 0, 'annotation', 'dy', { id: selection.key })}</div>${check('隐藏此文字', nameNode ? !C.labelVisible(project,nameNode) : a.hidden, 'annotation', 'hidden', { id: selection.key })}<div class="button-row">${button('恢复自动内容', 'reset-text')}${button('恢复默认样式', 'reset-annotation')}</div>`;
+  }
+  if (n?.placeholder) return `<div class="section-title">空白状态 · 阶段 ${n.stage}</div>${button('移出空白状态','remove-blank',n.id,'full danger')}`;
+  if (n) return nodePanel(s, n);
+  if (e) return edgePanel(s, e);
+  if (selection?.kind === 'system' && s) return `<div class="section-title">体系设置</div>${field('体系 / 图例名称', s.name, 'system', 'name', { id: s.id })}${systemColorField(s)}${project.inputMode==='raw' ? field('参考项起点',C.referenceStart(s).id,'system','termOrigin',{id:s.id,options:realNodes(s).map(n=>[n.id,n.label])})+button('重算参考项','infer-terms','','full mini') : ''}${check('在图上显示', s.visible, 'system', 'visible', { id: s.id })}<div class="button-row">${button('复制体系', 'copy-system')}${button('移出体系', 'remove-system', '', 'danger')}</div>`;
+  return `<div class="section">${field('图标题', project.title, 'project', 'title', { textarea: true })}${field('副标题', project.subtitle, 'project', 'subtitle')}${field('图注', project.note, 'project', 'note', { textarea: true })}</div>`;
+}
+function calcBox(s, n) {
+  const g = C.energy(project, s, n);
+  let h = `<div class="value-box"><small>相对 ${project.energyMode} · ${esc(project.style.unit)}</small><br><strong>${valueText(display(g.value), 4)}</strong>`;
+  if (project.inputMode === 'raw') {
+    h += g.pieces.map(p => `<div class="calc-row"><span>${rich(p.name)}</span><span>${valueText(p.value, 6)} eV</span></div>`).join('');
+    h += `<div class="calc-row total"><span>完整状态</span><span>${valueText(g.absolute, 6)} eV</span></div><div class="calc-row"><span>减参照组合</span><span>${valueText(g.baseline, 6)} eV</span></div><div class="calc-row total"><span>相减结果</span><span>${valueText(g.value, 6)} eV</span></div>`;
+  }
+  return h + '</div>' + (g.error ? `<div class="error">${esc(g.error)}</div>` : '');
+}
+function energyFields(n, scope) {
+  const id = selection.id;
+  if (project.inputMode === 'relative') return numeric('相对能 / eV', n.relative, scope, 'relative', { id });
+  const rows = n.terms.map((t, i) => `<div class="term-row"><label>小分子 ${i + 1}<select aria-label="小分子 ${i + 1}" data-edit="term" data-field="ref" data-owner="${scope}" data-id="${id}" data-sys="${activeSys}" data-index="${i}">${project.refs.some(r=>r.id===t.ref) ? '' : `<option value="${t.ref}" selected>${esc(t.ref)} · 待填</option>`}${project.refs.map(r => `<option value="${r.id}" ${r.id === t.ref ? 'selected' : ''}>${esc(C.optionText(r.name))} (${r.id})</option>`).join('')}</select></label><label>系数 ${i + 1}<input aria-label="系数 ${i + 1}" type="number" step="any" data-edit="term" data-field="n" data-owner="${scope}" data-id="${id}" data-sys="${activeSys}" data-index="${i}" value="${t.n}"></label>${button('×', 'remove-term', String(i), 'mini danger')}</div>`).join('');
+  return `<div class="form-row">${numeric('结构 E / eV', n.e, scope, 'e', { id })}${numeric('Gcorr / eV', n.gcorr, scope, 'gcorr', { id })}</div><div class="terms-editor"><div class="section-title">小分子参考项</div>${rows}<button type="button" data-action="add-term" class="full mini" ${project.refs.length ? '' : 'disabled'}>＋ 添加小分子项</button>${project.refs.length ? '' : ''}<details><summary>直接编辑系数表达式</summary>${field('小分子系数（ID:系数）', C.termsText(n.terms), scope, 'terms', { id, extra: 'placeholder="H2:0.5, H2O:-1"' })}<div class="error" id="terms-error"></div></details></div>${numeric('额外修正 / eV', n.correction, scope, 'correction', { id })}`;
+}
+function nodePanel(s, n) {
+  const energyKey = 'energy:' + n.id;
+  const energyVisibility = project.style.energies ? `<div class="section-title">图中相对能数字</div>${check('隐藏此文字',project.annotations[energyKey]?.hidden,'annotation','hidden',{id:energyKey,sys:s.id})}` : '';
+  return `<div class="section-title"><span><span data-system-name="${s.id}">${rich(s.name)}</span> · 状态</span></div>${field('状态名称', n.label, 'node', 'label', { id: n.id })}${check('显示名称',C.labelVisible(project,n),'node','showLabel',{id:n.id})}${energyFields(n, 'node')}<div id="calc-box">${calcBox(s, n)}</div>${energyVisibility}<div class="section-title">横向布局</div>${numeric('反应阶段', n.stage, 'node', 'stage', { id: n.id })}<div class="form-row">${numeric('横向微移 / px', n.x, 'node', 'x', { id: n.id })}${numeric('台阶宽度倍数', n.width, 'node', 'width', { id: n.id, extra: 'min="0.2" max="2"' })}</div><div class="button-row">${button('设为参照', 'set-baseline', n.id)}${button('从此分支', 'add-branch', n.id)}</div><div class="button-row">${button('连接到其他台阶', 'add-edge', n.id)}</div><div class="button-row">${button('移出状态', 'remove-node', n.id, 'danger')}</div>`;
+}
+function edgePanel(s, e) {
+  const options = realNodes(s).map(n => [n.id, n.label]);
+  const deltaKey = 'delta:' + e.id;
+  let h = `<div class="section-title">反应连接</div>${field('起点', e.from, 'edge', 'from', { id: e.id, options })}${field('终点', e.to, 'edge', 'to', { id: e.id, options })}<div class="section-title">反应能差数字</div>${check('隐藏此文字',project.annotations[deltaKey]?.hidden || !e.showDelta,'annotation','hidden',{id:deltaKey,sys:s.id})}<div class="button-row">${button(e.ts ? '移出过渡态' : '＋ 添加过渡态', 'toggle-ts', e.id)}${button('移出连接', 'remove-edge', e.id, 'danger')}</div>`;
+  if (e.ts) h += `<div class="section" style="margin-top:22px"><div class="section-title">过渡态</div>${field('过渡态名称', e.ts.label, 'ts', 'label', { id: e.id })}${energyFields(e.ts, 'ts')}<div id="calc-box">${calcBox(s, e.ts)}</div><div id="barrier-box">${barrierBox(s, e)}</div></div>`;
+  return h;
+}
+function barrierBox(s, e) {
+  const ts = C.energy(project, s, e.ts).value, from = C.energy(project, s, state(s, e.from)).value, to = C.energy(project, s, state(s, e.to)).value;
+  return `<div class="calc-row"><span>正向势垒（TS − 起点）</span><span>${valueText(display(ts - from), 4)} ${esc(project.style.unit)}</span></div><div class="calc-row"><span>逆向势垒（TS − 终点）</span><span>${valueText(display(ts - to), 4)} ${esc(project.style.unit)}</span></div>`;
+}
+function axesPanel() {
+  const v = { ...C.defaults(), ...project.style };
+  return `<div class="section"><div class="section-title">网格与坐标轴</div>${check('显示水平网格',v.grid,'style','grid')}<div class="form-row">${numeric('网格线宽 / px',v.gridWidth,'style','gridWidth',{extra:'min="0.1" max="12"'})}${field('网格颜色',v.gridColor,'style','gridColor',{type:'color'})}</div><div class="form-row">${numeric('坐标轴线宽 / px',v.axisWidth,'style','axisWidth',{extra:'min="0.1" max="12"'})}${field('坐标轴颜色',v.axisColor,'style','axisColor',{type:'color'})}</div></div>`;
+}
+const systemColorField = s => field('体系整体颜色 · ' + s.name,s.color,'system','color',{id:s.id,sys:s.id,type:'color'});
+function legendPanel() {
+  const v = { ...C.defaults(), ...project.style };
+  return `${project.systems.map(systemColorField).join('')}<div class="section"><div class="section-title">图例</div>${check('显示图例',v.legendVisible,'style','legendVisible')}${field('排列',v.legendLayout,'style','legendLayout',{options:[['horizontal','横排'],['vertical','竖排']]})}${field('图例字体',v.legendFont,'style','legendFont',{options:[['','跟随全局'],['Arial, Microsoft YaHei, sans-serif','Arial / 微软雅黑'],['Times New Roman, SimSun, serif','Times New Roman / 宋体'],['Microsoft YaHei, sans-serif','微软雅黑']]})}<div class="form-row">${numeric('图例字号',v.legendSize,'style','legendSize',{extra:'min="8" max="80" placeholder="自动"'})}${field('图例文字颜色',v.legendColor,'style','legendColor',{type:'color'})}</div>${check('图例文字加粗',v.legendBold,'style','legendBold')}<div class="form-row">${numeric('图例水平偏移 / px',v.legendDx,'style','legendDx',{extra:'min="-2400" max="2400"'})}${numeric('图例垂直偏移 / px',v.legendDy,'style','legendDy',{extra:'min="-2400" max="2400"'})}</div>${button('恢复图例位置','reset-legend-position','','full mini')}<details class="style-details"><summary>线段与间距</summary><div class="form-row">${numeric('图例线宽 / px',v.legendLineWidth,'style','legendLineWidth',{extra:'min="0.1" max="12" placeholder="跟随台阶"'})}${numeric('图例线段长度 / px',v.legendLineLength,'style','legendLineLength',{extra:'min="8" max="120"'})}</div>${numeric('图例间距 / px',v.legendGap,'style','legendGap',{extra:'min="0" max="100"'})}</details><details class="style-details"><summary>底框</summary>${check('显示图例底框',v.legendBox,'style','legendBox')}<div class="form-row">${field('图例底色',v.legendBackground,'style','legendBackground',{type:'color'})}${field('图例边框颜色',v.legendBorderColor,'style','legendBorderColor',{type:'color'})}</div>${numeric('图例边框线宽 / px',v.legendBorderWidth,'style','legendBorderWidth',{extra:'min="0.1" max="12"'})}</details></div>`;
+}
+function stylePanel() {
+  const v = { ...C.defaults(), ...project.style };
+  return `<div class="section"><div class="section-title">图形文字</div>${field('图标题', project.title, 'project', 'title', { textarea: true })}${field('副标题', project.subtitle, 'project', 'subtitle')}${field('横轴名称', project.xLabel, 'project', 'xLabel')}${field('纵轴名称', project.yLabel, 'project', 'yLabel')}${field('图注', project.note, 'project', 'note', { textarea: true })}</div><div class="section"><div class="section-title">画布与字号</div><div class="form-row">${numeric('宽度 / px', v.width, 'style', 'width', { extra: 'min="560" max="2400"' })}${numeric('高度 / px', v.height, 'style', 'height', { extra: 'min="400" max="1600"' })}</div><div class="form-row">${numeric('绘图区宽度 / px',v.plotWidth ?? '','style','plotWidth',{extra:'min="240" max="'+(v.width-128)+'"'})}${numeric('绘图区高度 / px',v.plotHeight ?? '','style','plotHeight',{extra:'min="160" max="'+(v.height-(project.subtitle?137:113)-(project.note?104:78))+'"'})}</div>${field('字体', v.font, 'style', 'font', { options: [['Arial, Microsoft YaHei, sans-serif', 'Arial / 微软雅黑'], ['Times New Roman, SimSun, serif', 'Times New Roman / 宋体'], ['Microsoft YaHei, sans-serif', '微软雅黑'], ['Calibri, Microsoft YaHei, sans-serif', 'Calibri / 微软雅黑']] })}<div class="form-row">${numeric('状态字号', v.fontSize, 'style', 'fontSize', { extra: 'min="10" max="64"' })}${numeric('数值字号', v.deltaSize, 'style', 'deltaSize', { extra: 'min="10" max="64"' })}</div>${numeric('标题字号', v.titleSize, 'style', 'titleSize', { extra: 'min="12" max="64"' })}${field('颜色方案', v.theme, 'palette', 'theme', { options: [['blue', '蓝 / 橙 · 清晰'], ['teal', '绿 / 紫 · 柔和'], ['mono', '黑 / 灰 · 简洁']] })}</div><div class="section"><div class="section-title">台阶与连接</div><div class="form-row">${numeric('线宽 / px', v.lineWidth, 'style', 'lineWidth', { extra: 'min="1" max="12"' })}${numeric('台阶占比', v.stepWidth, 'style', 'stepWidth', { extra: 'min="0.15" max="0.9"' })}</div><div class="form-row">${numeric('虚线段长（0=实线）', v.dash, 'style', 'dash', { extra: 'min="0" max="30"' })}${numeric('虚线间隔', v.gap, 'style', 'gap', { extra: 'min="0" max="30"' })}</div>${check('显示连接能差 ΔG / ΔE', v.deltas, 'style', 'deltas')}${check('显示各状态相对能', v.energies, 'style', 'energies')}</div>${axesPanel()}${legendPanel()}<div class="section"><div class="section-title">纵轴与数值</div>${field('显示单位', v.unit, 'style', 'unit', { options: Object.keys(C.factor).map(k => [k, k]) })}${numeric('小数位数', v.decimals, 'style', 'decimals', { extra: 'min="0" max="5" step="1"' })}<div class="form-row">${numeric('纵轴下限（留空自动）', v.yMin, 'style', 'yMin')}${numeric('纵轴上限（留空自动）', v.yMax, 'style', 'yMax')}</div></div>`;
+}
+function svgElement(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e); return e;
+}
+function renderPlot() {
+  const v = { ...C.defaults(), ...project.style }, width = v.width, height = v.height;
+  $('plot').innerHTML = ''; annotationMeta = new Map();
+  const plotTitle = project.annotations.title?.text ?? project.title;
+  const svg = svgElement('svg', { xmlns: NS, viewBox: `0 0 ${width} ${height}`, width, height, role: 'img', 'aria-label': plotTitle }, $('plot'));
+  svg.style.fontFamily = v.font; svg.style.background = '#fff';
+  svgElement('rect', { width, height, fill: '#fff' }, svg);
+  const title = svgElement('title', {}, svg); title.textContent = plotTitle;
+  const lines = svgElement('g', {}, svg), labels = svgElement('g', {}, svg), overlay = svgElement('g', { id: 'plot-overlay' }, svg);
+  const visible = project.systems.filter(s => s.visible), all = visible.flatMap(s => s.nodes.map(n => ({ s, n, energy: display(C.energy(project, s, n).value) })));
+  const finite = all.filter(a => Number.isFinite(a.energy));
+  const warnings = [];
+  const margin = { l: 94, r: 34, t: project.subtitle ? 137 : 113, b: project.note ? 104 : 78 };
+  const maxWidth = width - margin.l - margin.r, maxHeight = height - margin.t - margin.b;
+  const area = { l: margin.l, r: margin.l + Math.min(maxWidth, Math.max(240, Number(v.plotWidth) || maxWidth)), t: margin.t, b: margin.t + Math.min(maxHeight, Math.max(160, Number(v.plotHeight) || maxHeight)) };
+  const energies = finite.map(a => a.energy).concat(visible.flatMap(s => s.edges.filter(e => e.ts).map(e => display(C.energy(project, s, e.ts).value)))).filter(Number.isFinite);
+  const eMin = Math.min(0, ...energies), eMax = Math.max(0, ...energies), span = Math.max(eMax - eMin, 1);
+  let yMin = v.yMin === '' ? eMin - span * .16 : v.yMin, yMax = v.yMax === '' ? eMax + span * .22 : v.yMax;
+  if (yMax <= yMin) { warnings.push('纵轴上限必须大于下限，当前已临时使用自动范围。'); yMin = eMin - span * .16; yMax = eMax + span * .22; }
+  const y = val => area.b - (val - yMin) / (yMax - yMin) * (area.b - area.t);
+  const {stages,positions}=C.horizontalLayout(visible,area.l,area.r,v.stepWidth);
+  const layout = new Map(), obstacles = [], textItems = [];
+  function addLine(x1, y1, x2, y2, color, lw, attrs = {}) {
+    const line = svgElement('line', { x1, y1, x2, y2, stroke: color, 'stroke-width': lw, 'stroke-linecap': 'round', ...attrs }, lines);
+    obstacles.push({ x1, y1, x2, y2 }); return line;
+  }
+  function addText(key, text, x, yy, size, color, description, opts = {}) {
+    const a = project.annotations[key] || {}, shown = a.text ?? text, fontSize = a.size || size, font = a.font || opts.font || v.font, bold = a.bold ?? Boolean(opts.bold);
+    const resolvedColor=(a.colorSystem ? sys(a.colorSystem)?.color : '') || a.color || color;
+    const g = svgElement('g', { transform: `translate(${x + (a.dx || 0)} ${yy + (a.dy || 0)}) rotate(${opts.rotate || 0})`, 'data-key': key, 'aria-label': description }, opts.parent || labels);
+    const t = svgElement('text', { 'font-family': font, 'font-size': fontSize, fill: resolvedColor, 'text-anchor': opts.anchor || 'middle', 'dominant-baseline': 'middle', 'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 5, 'stroke-linejoin': 'round', 'font-weight': bold ? '600' : '400' }, g);
+    String(shown).split('\n').forEach((line, i, arr) => {
+      const span = svgElement('tspan', { x: 0, dy: i === 0 ? -(arr.length - 1) * fontSize * .58 : fontSize * 1.16 }, t);
+      for (const run of C.textRuns(line)) { const part = svgElement('tspan', run.script ? { 'font-size': fontSize * .7, 'baseline-shift': run.script } : {}, span); part.textContent = run.text; }
+    });
+    const hidden = Boolean(a.hidden || opts.hidden);
+    if (hidden) g.setAttribute('display', 'none');
+    const meta = { key, text, shown, x, y: yy, size, fontSize, font, bold, color, resolvedColor, hidden, description, opts, g, t, baseX: x, baseY: yy };
+    annotationMeta.set(key, meta); textItems.push(meta); return g;
+  }
+  addText('title', project.title, width / 2, 35, v.titleSize, '#263c4b', '图标题', { fixed: true });
+  if (project.subtitle) addText('subtitle', project.subtitle, width / 2, 68, Math.max(15, v.fontSize - 5), '#697983', '副标题', { fixed: true });
+  const tickTarget = (yMax - yMin) / 5, pow = Math.pow(10, Math.floor(Math.log10(tickTarget))), rough = tickTarget / pow;
+  const tick = (rough <= 1 ? 1 : rough <= 2 ? 2 : rough <= 2.5 ? 2.5 : rough <= 5 ? 5 : 10) * pow;
+  const tickDigits = Math.max(0, -Math.floor(Math.log10(tick)) + (String(tick / pow).includes('.') ? 1 : 0));
+  for (let val = Math.ceil(yMin / tick) * tick, i = 0; val <= yMax && i < 30; val += tick, i++) {
+    const yy = y(val), zero = Math.abs(val) < tick * .001;
+    if (v.grid) svgElement('line', { x1: area.l, y1: yy, x2: area.r, y2: yy, stroke: v.gridColor, 'stroke-width': v.gridWidth, 'data-grid': 'true' }, lines);
+    svgElement('line', { x1: area.l - 5, y1: yy, x2: area.l, y2: yy, stroke: v.axisColor, 'stroke-width': v.axisWidth, 'data-axis': 'tick' }, lines);
+    addText('tick:' + i, valueText(zero ? 0 : val, tickDigits), area.l - 13, yy, Math.max(14, v.fontSize - 5), '#596b75', '纵轴刻度', { anchor: 'end', fixed: true });
+  }
+  svgElement('line', { x1: area.l, y1: area.t - 6, x2: area.l, y2: area.b, stroke: v.axisColor, 'stroke-width': v.axisWidth, 'data-axis': 'y' }, lines);
+  svgElement('line', { x1: area.l, y1: area.b, x2: area.r, y2: area.b, stroke: v.axisColor, 'stroke-width': v.axisWidth, 'data-axis': 'x' }, lines);
+  addText('yLabel', project.yLabel + ' (' + v.unit + ')', 27, (area.t + area.b) / 2, Math.max(16, v.fontSize - 2), '#394d59', '纵轴名称', { rotate: -90, fixed: true });
+  addText('xLabel', project.xLabel, (area.l + area.r) / 2, area.b + 42, Math.max(16, v.fontSize - 2), '#394d59', '横轴名称', { fixed: true });
+  if (project.note) addText('note', project.note, width / 2, height - 23, Math.max(12, v.fontSize - 9), '#718088', '图注', { fixed: true });
+  const legend = svgElement('g', { 'data-legend': 'true', 'aria-label': '图例，拖动线段或空隙移动' }, svg);
+  const legendBackground = svgElement('rect', { rx: 4, fill: v.legendBox ? v.legendBackground : 'transparent', stroke: v.legendBox ? v.legendBorderColor : 'none', 'stroke-width': v.legendBorderWidth }, legend);
+  let legendX = area.l + 8 + v.legendDx, legendY = (project.subtitle ? 103 : 80) + v.legendDy;
+  if (v.legendVisible) visible.forEach(s => {
+    const a = project.annotations['legend:' + s.id] || {};
+    const lg = addText('legend:' + s.id, s.name, legendX + v.legendLineLength + 11, legendY, v.legendSize || Math.max(15, v.fontSize - 3), v.legendColor, '图例：' + s.name, { anchor: 'start', fixed: true, font: v.legendFont, bold: v.legendBold, parent: legend, owner:{kind:'system',id:s.id,sys:s.id} });
+    const meta = annotationMeta.get('legend:' + s.id), box = textBox(meta);
+    if (!meta.hidden) {
+      const lx = legendX + (a.dx || 0), ly = legendY + (a.dy || 0);
+      svgElement('line', { x1: lx, y1: ly, x2: lx + v.legendLineLength, y2: ly, stroke: 'transparent', 'stroke-width': Math.max(18, v.legendLineWidth || v.lineWidth) }, legend);
+      svgElement('line', { x1: lx, y1: ly, x2: lx + v.legendLineLength, y2: ly, stroke: s.color, 'stroke-width': v.legendLineWidth || v.lineWidth, 'stroke-linecap': 'round' }, legend);
+    }
+    if (v.legendLayout === 'vertical') legendY += Math.max(meta.fontSize, box.h) + v.legendGap;
+    else legendX += v.legendLineLength + 11 + box.w + v.legendGap;
+  });
+  let legendBounds = null;
+  if (v.legendVisible && visible.length) {
+    const b = legend.getBBox(); legendBounds = { x: b.x - 9, y: b.y - 9, w: b.width + 18, h: b.height + 18 };
+    for (const [key, val] of Object.entries({ x: legendBounds.x, y: legendBounds.y, width: legendBounds.w, height: legendBounds.h })) legendBackground.setAttribute(key, val);
+    if (b.x < 0 || b.x + b.width > width || b.y < 0 || b.y + b.height > height) warnings.push('图例超出画布，可拖动线段调整位置。');
+  }
+  for (const a of finite) {
+    const {x,half}=positions.get(a.n.id);
+    layout.set(a.n.id, { x, y: y(a.energy), half, energy: a.energy, a });
+    if (a.energy < yMin || a.energy > yMax) warnings.push(a.s.name + ' / ' + a.n.label + ' 超出纵轴范围。');
+  }
+  finite.forEach(a => {
+    const p = layout.get(a.n.id), attrs = { 'data-node': a.n.id, 'data-sys': a.s.id };
+    svgElement('line', { x1: p.x - p.half, y1: p.y, x2: p.x + p.half, y2: p.y, stroke: 'transparent', 'stroke-width': 18, ...attrs }, lines);
+    addLine(p.x - p.half, p.y, p.x + p.half, p.y, a.s.color, v.lineWidth, attrs);
+    if (a.n.transition) svgElement('circle',{cx:p.x,cy:p.y,r:3.5,fill:a.s.color,...attrs},lines);
+    addText('node:' + a.n.id, a.n.label, p.x, p.y - v.fontSize * .9, v.fontSize, '#293f4c', '状态名称：' + a.n.label,{hidden:!C.labelVisible(project,a.n),owner:{kind:'node',id:a.n.id,sys:a.s.id}});
+    if (v.energies) addText('energy:' + a.n.id, valueText(p.energy), p.x, p.y + v.deltaSize * 1.05, v.deltaSize, a.s.color, '相对能：' + a.n.label,{owner:{kind:'node',id:a.n.id,sys:a.s.id}});
+  });
+  visible.forEach((s, si) => s.edges.forEach(e => {
+    const a = layout.get(e.from), b = layout.get(e.to); if (!a || !b) return;
+    const forward = b.x >= a.x, xa = a.x + (forward ? a.half : -a.half), xb = b.x - (forward ? b.half : -b.half);
+    const attrs = { 'data-edge': e.id, 'data-sys': s.id, 'stroke-dasharray': v.dash ? `${v.dash} ${v.gap}` : 'none' };
+    let lx = (xa + xb) / 2, ly = (a.y + b.y) / 2;
+    function connector(x1, y1, x2, y2) { svgElement('line', { x1, y1, x2, y2, stroke: 'transparent', 'stroke-width': 17, 'data-edge': e.id, 'data-sys': s.id }, lines); addLine(x1, y1, x2, y2, s.color, Math.max(1, v.lineWidth * .62), attrs); }
+    if (e.ts) {
+      const tsEnergy = display(C.energy(project, s, e.ts).value), ty = y(tsEnergy), th = Math.min(12, Math.abs(xb - xa) / 7);
+      if (Number.isFinite(tsEnergy)) {
+        connector(xa, a.y, lx - th, ty); connector(lx + th, ty, xb, b.y);
+        addLine(lx - th, ty, lx + th, ty, s.color, v.lineWidth, { 'data-edge': e.id, 'data-sys': s.id });
+        svgElement('circle', { cx: lx, cy: ty, r: 3.5, fill: s.color, 'data-edge': e.id, 'data-sys': s.id }, lines);
+        addText('ts:' + e.id, e.ts.label, lx, ty - v.fontSize, Math.max(16, v.fontSize - 3), s.color, '过渡态名称',{owner:{kind:'edge',id:e.id,sys:s.id}});
+        ly = (a.y + b.y) / 2 + (si % 2 ? 12 : -12);
+        if (tsEnergy < Math.max(a.energy, b.energy)) warnings.push(s.name + ' 的 ' + e.ts.label + ' 低于某个端点，请检查过渡态能量。');
+        if (Math.abs(xb - xa) < 35) warnings.push('过渡态空间偏窄，可减小台阶占比或调整横向位置。');
+      }
+    } else connector(xa, a.y, xb, b.y);
+    if (v.deltas) addText('delta:' + e.id, valueText(b.energy - a.energy, v.decimals, true), lx, ly + (si % 2 ? 16 : -16), v.deltaSize, s.color, '反应能差（终点减起点）',{hidden:!e.showDelta,owner:{kind:'edge',id:e.id,sys:s.id}});
+  }));
+  if (!finite.length) addText('empty', all.length ? '待填能量' : '添加体系，开始绘图', width / 2, height / 2, v.fontSize, '#899b9e', '空画布提示', { fixed: true });
+  svg.appendChild(overlay);
+  drawing = { svg, overlay, layout, area, width, height, legendBounds };
+  placeLabels(textItems, obstacles);
+  const collisions = countCollisions(textItems.filter(m => !m.opts.fixed && !m.hidden));
+  if (collisions) warnings.push('仍有 ' + collisions + ' 处标注靠得较近，可拖动文字或增加画布尺寸。');
+  const results = visible.flatMap(s => [...realNodes(s),...s.edges.filter(e=>e.ts).map(e=>e.ts)].map(n=>({s,n,g:C.energy(project,s,n)})));
+  const pending = [...new Set(results.flatMap(a=>a.g.pending || []))];
+  if (pending.length) warnings.unshift('待填小分子能量：'+pending.map(id=>C.optionText(project.refs.find(r=>r.id===id)?.name || id)).join('、'));
+  const checks = results.filter(a=>a.n.autoIssue).map(a=>C.optionText(a.n.label));
+  if (checks.length) warnings.push('待检查参考项：'+checks.join('、'));
+  $('warnings').textContent = [...new Set([...results.map(a=>a.g.error).filter(Boolean), ...warnings])].join('　');
+  $('plot-summary').textContent = `${visible.length} 个体系 · ${stages.length} 个阶段`;
+  $('dimensions').textContent = `${width} × ${height} px · ${v.unit}`;
+  document.querySelectorAll('[data-energy]').forEach(el => { const s = project.systems.find(s => s.nodes.some(n => n.id === el.dataset.energy)), n = state(s, el.dataset.energy); if (n) el.textContent = valueText(display(C.energy(project, s, n).value)); });
+  for (const s of project.systems) {
+    document.querySelectorAll(`[data-system-name="${s.id}"]`).forEach(el => { if (!el.querySelector('input')) el.innerHTML = rich(s.name); });
+    document.querySelectorAll(`[data-edit="system"][data-field="color"][data-id="${s.id}"]`).forEach(el => {
+      if (document.activeElement !== el) el.value = s.color;
+      if (el.classList.contains('system-color')) el.setAttribute('aria-label','体系整体颜色：' + s.name);
+      else el.closest('.field').querySelector('label').textContent = '体系整体颜色 · ' + s.name;
+    });
+    document.querySelectorAll(`[data-edit="system"][data-field="visible"][data-id="${s.id}"]`).forEach(el => el.setAttribute('aria-label','显示 ' + s.name));
+    for (const n of s.nodes) { const name = document.querySelector(`[data-node-name="${n.id}"]`), stage = document.querySelector(`[data-node-stage="${n.id}"]`), terms = document.querySelector(`[data-node-terms="${n.id}"]`); if (name && !name.querySelector('input')) name.innerHTML = rich(n.label); if (stage) stage.textContent = n.stage; if (terms) terms.innerHTML = rich(termsLabel(n.terms)); }
+  }
+  document.querySelectorAll('[data-ref-g]').forEach(el => { const r = project.refs.find(r => r.id === el.dataset.refG); if (r) el.textContent = valueText(typeof r.e === 'number' && typeof r.gcorr === 'number' ? r.e + r.gcorr : NaN, 6); });
+  document.querySelectorAll('[data-ref-name]').forEach(el => { const r = project.refs.find(r => r.id === el.dataset.refName); if (r) el.innerHTML = rich(r.name); });
+  document.querySelectorAll('[data-edit="node"][data-field="showLabel"]').forEach(el => el.checked = C.labelVisible(project,state(sys(el.dataset.sys),el.dataset.id)));
+  const selectedSystem = sys(selection?.sys), selectedNode = selection?.kind === 'node' ? state(selectedSystem, selection.id) : selection?.kind === 'edge' ? link(selectedSystem, selection.id)?.ts : null;
+  if (selectedNode && $('calc-box')) $('calc-box').innerHTML = calcBox(selectedSystem, selectedNode);
+  if ($('barrier-box')) $('barrier-box').innerHTML = barrierBox(selectedSystem, link(selectedSystem, selection.id));
+  if (selection?.kind==='annotation') {
+    const input=$('inspector-content').querySelector('[data-edit="annotation"][data-field="color"]'), meta=annotationMeta.get(selection.key);
+    if (input && meta && document.activeElement!==input) input.value=meta.resolvedColor;
+    const hidden=$('inspector-content').querySelector('[data-field="hidden"]'); if (hidden) hidden.checked=selectedKeys().every(key=>annotationMeta.get(key)?.hidden);
+  }
+  applyZoom(); renderSelection(); cards?.render();
+}
+function textBox(meta) {
+  const b = meta.t.getBBox(), matrix = meta.g.transform.baseVal.consolidate().matrix;
+  const points = [[b.x, b.y], [b.x + b.width, b.y], [b.x, b.y + b.height], [b.x + b.width, b.y + b.height]].map(([x, y]) => new DOMPoint(x, y).matrixTransform(matrix));
+  return { x: Math.min(...points.map(p => p.x)), y: Math.min(...points.map(p => p.y)), w: Math.max(...points.map(p => p.x)) - Math.min(...points.map(p => p.x)), h: Math.max(...points.map(p => p.y)) - Math.min(...points.map(p => p.y)) };
+}
+const overlap = (a, b, pad = 5) => Math.max(0, Math.min(a.x + a.w + pad, b.x + b.w) - Math.max(a.x - pad, b.x)) * Math.max(0, Math.min(a.y + a.h + pad, b.y + b.h) - Math.max(a.y - pad, b.y));
+function segmentHits(box, line) {
+  const pad = 4, left = box.x - pad, right = box.x + box.w + pad, top = box.y - pad, bottom = box.y + box.h + pad;
+  for (let i = 0; i <= 15; i++) { const x = line.x1 + (line.x2 - line.x1) * i / 15, y = line.y1 + (line.y2 - line.y1) * i / 15; if (x >= left && x <= right && y >= top && y <= bottom) return true; }
+  return false;
+}
+function placeLabels(items, obstacles) {
+  const fixed = items.filter(m => m.opts.fixed && !m.hidden).map(textBox), placed = [...fixed];
+  const order = items.filter(m => !m.opts.fixed && !m.hidden).sort((a, b) => Number(!a.key.startsWith('node:')) - Number(!b.key.startsWith('node:')));
+  for (const m of order) {
+    const a = project.annotations[m.key] || {};
+    if (a.dx || a.dy) { placed.push(textBox(m)); continue; }
+    const size = a.size || m.size, offsets = [[0, 0], [0, -size * 1.3], [0, size * 1.3], [-size, -size * .65], [size, -size * .65], [-size, size * .65], [size, size * .65], [0, -size * 2.6], [0, size * 2.6], [-size * 2, 0], [size * 2, 0]];
+    let best = { cost: Infinity, dx: 0, dy: 0 };
+    for (const [dx, dy] of offsets) {
+      m.g.setAttribute('transform', `translate(${m.x + dx} ${m.y + dy}) rotate(${m.opts.rotate || 0})`);
+      const b = textBox(m), outside = b.x < 8 || b.x + b.w > drawing.width - 8 || b.y < 5 || b.y + b.h > drawing.height - 5;
+      const cost = placed.reduce((sum, p) => sum + overlap(b, p), 0) * 20 + obstacles.filter(l => segmentHits(b, l)).length * 450 + (outside ? 100000 : 0) + Math.hypot(dx, dy);
+      if (cost < best.cost) best = { cost, dx, dy }; if (cost === 0) break;
+    }
+    m.baseX = m.x + best.dx; m.baseY = m.y + best.dy;
+    m.g.setAttribute('transform', `translate(${m.baseX} ${m.baseY}) rotate(${m.opts.rotate || 0})`); placed.push(textBox(m));
+  }
+}
+function countCollisions(items) { let count = 0; for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) if (overlap(textBox(items[i]), textBox(items[j]), 1) > 12) count++; return count; }
+function renderSelection() {
+  if (!drawing.overlay) return; drawing.overlay.innerHTML = '';
+  const area = drawing.area;
+  svgElement('rect', { x: area.r - 8, y: area.b - 8, width: 16, height: 16, rx: 3, fill: '#fff', stroke: '#8baca0', 'stroke-width': 1, 'data-plot-resize': 'true', 'aria-label': '调整绘图区大小', class: 'plot-resize' }, drawing.overlay);
+  svgElement('path', { d: `M${area.r-3} ${area.b+3}l6 -6m-1 6l1 -1`, fill: 'none', stroke: '#578b78', 'stroke-width': 1.3, 'pointer-events': 'none' }, drawing.overlay);
+  if (selection?.kind === 'annotation') {
+    for (const key of selectedKeys()) {
+      const m = annotationMeta.get(key); if (!m || m.hidden) continue;
+      const b = textBox(m); svgElement('rect', { x: b.x - 5, y: b.y - 4, width: b.w + 10, height: b.h + 8, rx: 3, fill: 'none', stroke: '#3b9e85', 'stroke-width': 1.4, 'stroke-dasharray': '4 3', class: 'selection-ring' }, drawing.overlay);
+    }
+  } else if (selection?.kind === 'legend' && drawing.legendBounds) {
+    const b = drawing.legendBounds;
+    svgElement('rect', { x: b.x - 3, y: b.y - 3, width: b.w + 6, height: b.h + 6, rx: 5, fill: 'none', stroke: '#3b9e85', 'stroke-width': 1.3, 'stroke-dasharray': '4 3', class: 'selection-ring' }, drawing.overlay);
+  } else if (selection?.kind === 'node') {
+    const p = drawing.layout.get(selection.id); if (p) svgElement('rect', { x: p.x - p.half - 6, y: p.y - 8, width: p.half * 2 + 12, height: 16, rx: 5, fill: '#3b9e8512', stroke: '#3b9e85', 'stroke-width': 1.2, class: 'selection-ring' }, drawing.overlay);
+  } else if (selection?.kind === 'edge') {
+    const boxes=[...drawing.svg.querySelectorAll(`[data-edge="${selection.id}"]`)].map(el=>el.getBBox());
+    if (boxes.length) {
+      const left=Math.min(...boxes.map(b=>b.x)), top=Math.min(...boxes.map(b=>b.y)), right=Math.max(...boxes.map(b=>b.x+b.width)), bottom=Math.max(...boxes.map(b=>b.y+b.height));
+      svgElement('rect',{x:left-7,y:top-7,width:right-left+14,height:bottom-top+14,rx:4,fill:'#3b9e8508',stroke:'#3b9e85','stroke-width':1.3,'stroke-dasharray':'4 3',class:'selection-ring'},drawing.overlay);
+    }
+  }
+  $('selection-hint').textContent = selection ? selection.kind === 'annotation' ? selectedKeys().length + ' 项文字' : selection.kind === 'legend' ? '图例' : '对象' : '';
+  updateTextToolbar();
+}
+function applyZoom() {
+  if (!drawing.svg) return;
+  const box = $('plot').getBoundingClientRect(), scale = Math.min(box.width / project.style.width, box.height / project.style.height);
+  const width = project.style.width * scale, height = project.style.height * scale;
+  drawing.fitScale = scale; drawing.left = (box.width - width) / 2; drawing.top = (box.height - height) / 2;
+  Object.assign(drawing.svg.style, { width: width + 'px', height: height + 'px', left: drawing.left + 'px', top: drawing.top + 'px', transform: `translate(${view.x}px,${view.y}px) scale(${view.zoom})` });
+  $('zoom').querySelector('[value="custom"]').textContent = Math.round(scale * view.zoom * 100) + '%';
+}
+function renderAll() { renderPanels(); renderPlot(); }
+function openConnection(fromId = '') {
+  const s = sys(); if (!s || realNodes(s).length < 2) { toast('先在同一体系中添加至少两条台阶'); return; }
+  connectionSystem = s.id;
+  const from = fromId || (selection?.kind === 'node' && selection.sys === s.id && !state(s,selection.id)?.placeholder ? selection.id : realNodes(s)[0].id);
+  const to = realNodes(s).find(n => n.id !== from && !s.edges.some(e => e.from === from && e.to === n.id)) || realNodes(s).find(n => n.id !== from);
+  const options = realNodes(s).map(n => `<option value="${n.id}">${esc(C.optionText(n.label))}（阶段 ${n.stage}）</option>`).join('');
+  $('connect-from').innerHTML = options; $('connect-to').innerHTML = options;
+  $('connect-from').value = from; $('connect-to').value = to.id;
+  $('connect-system').textContent = '当前体系：' + s.name; $('connect-error').textContent = ''; $('connect-dialog').showModal();
+}
+function applyScript(input, kind) {
+  const result = C.formatText(input.value, input.selectionStart, input.selectionEnd, kind);
+  if (result.error) { toast(result.error); input.focus(); return; }
+  input.value = result.value; input.dispatchEvent(new Event('input', { bubbles: true })); input.focus(); input.setSelectionRange(result.start, result.end);
+}
+async function saveFile(makeBlob, extension, mime) {
+  const result = await StepFiles.save(makeBlob, C.exportName(project, extension), mime);
+  if (result.status === 'saved') return true;
+  if (result.status !== 'cancelled') {
+    $('save-error-message').textContent = result.status === 'unsupported' ? '当前浏览器不支持选择保存位置。请用 Chrome 或 Edge 打开此 HTML 后保存。' : '未能保存，请重新选择位置。' + (result.message || '');
+    $('save-error-dialog').showModal();
+  }
+  return false;
+}
+async function saveProject() {
+  finishCanvasText(); endColorEdit();
+  const snapshot = JSON.stringify(project), content = JSON.stringify(project, null, 2);
+  if (!await saveFile(() => new Blob([content], { type: 'application/json' }), 'json', 'application/json')) return false;
+  exported = snapshot; persist(); toast('工程已保存'); return true;
+}
+function svgSource() {
+  const copy = drawing.svg.cloneNode(true); copy.querySelector('#plot-overlay')?.remove();
+  copy.removeAttribute('role'); copy.removeAttribute('style'); copy.style.fontFamily = project.style.font; copy.style.background = '#fff'; copy.setAttribute('width', project.style.width); copy.setAttribute('height', project.style.height);
+  copy.querySelectorAll('[data-key], [data-node], [data-edge]').forEach(e => { for (const a of ['data-key', 'data-node', 'data-edge', 'data-sys']) e.removeAttribute(a); });
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(copy);
+}
+async function exportPng() {
+  const scale = Number($('png-scale').value), source = new Blob([svgSource()], { type: 'image/svg+xml;charset=utf-8' });
+  const width = project.style.width * scale, height = project.style.height * scale;
+  const makeBlob = () => new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(source), img = new Image();
+    img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height); ctx.drawImage(img, 0, 0, width, height); canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('PNG 转换失败')), 'image/png'); URL.revokeObjectURL(url); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('PNG 转换失败，可先导出 SVG')); }; img.src = url;
+  });
+  if (await saveFile(makeBlob, 'png', 'image/png')) toast(`PNG 已保存 · ${width} × ${height}`);
+}
+async function exportSvg() {
+  const source = svgSource();
+  if (await saveFile(() => new Blob([source], { type: 'image/svg+xml;charset=utf-8' }), 'svg', 'image/svg+xml')) toast('SVG 已保存');
+}
+async function exportCsv() {
+  const rows = [['体系', '状态', '阶段', 'E_eV', 'Gcorr_eV', '小分子系数', '额外修正_eV', '参照状态', '完整能量_eV', '参照组合_eV', '相对能_eV', '显示单位', '显示相对能', '输入模式', '能量模式']];
+  for (const s of project.systems) for (const n of [...realNodes(s), ...s.edges.filter(e => e.ts).map(e => e.ts)]) {
+    const g = C.energy(project, s, n); rows.push([s.name, n.label, n.stage, n.e, n.gcorr, C.termsText(n.terms), n.correction, state(s, s.baseline).label, g.absolute, g.baseline, g.value, project.style.unit, display(g.value), project.inputMode, project.energyMode]);
+  }
+  const csv = '\uFEFF' + rows.map(row => row.map(v => '"' + String(typeof v === 'number' && !Number.isFinite(v) ? '' : v ?? '').replaceAll('"', '""') + '"').join(',')).join('\r\n');
+  if (await saveFile(() => new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'csv', 'text/csv')) toast('计算结果已保存');
+}
+function replaceDialog(title, action) { if (!dirty) { action(); return; } confirmAction = action; $('confirm-title').textContent = title; $('confirm-dialog').showModal(); }
+const energyTarget = (scope, id, sid) => scope === 'node' ? state(sys(sid), id) : link(sys(sid), id)?.ts;
+const selectedEnergy = () => energyTarget(selection.kind === 'node' ? 'node' : 'ts', selection.id, selection.sys);
+function syncRefFields(ref, oldId, input) {
+  document.querySelectorAll(`[data-id="${oldId}"]`).forEach(el => { if (el.dataset.edit?.startsWith('ref') || el.dataset.action === 'remove-ref') el.dataset.id = ref.id; });
+  for (const key of ['refName', 'refG']) document.querySelectorAll(`[data-${key === 'refName' ? 'ref-name' : 'ref-g'}="${oldId}"]`).forEach(el => el.dataset[key] = ref.id);
+  document.querySelectorAll(`[data-id="${ref.id}"]`).forEach(el => { if (el !== input && ['ref-id', 'ref-name'].includes(el.dataset.edit)) el.value = el.dataset.edit === 'ref-id' ? ref.id : ref.name; });
+  document.querySelectorAll('[data-edit="term"][data-field="ref"]').forEach(el => { const value = el.value === oldId ? ref.id : el.value; el.innerHTML = project.refs.map(r => `<option value="${r.id}" ${r.id === value ? 'selected' : ''}>${esc(C.optionText(r.name))} (${r.id})</option>`).join(''); });
+  const raw = $('inspector-content').querySelector('[data-field="terms"]'); if (raw) raw.value = C.termsText(energyTarget(raw.dataset.edit, raw.dataset.id, raw.dataset.sys).terms);
+}
+function updateField(input, isChange = false) {
+  const { edit, field: key, id, sys: sid } = input.dataset;
+  if (!edit) return;
+  if (edit === 'ui') { activeSys = input.value; selection = null; renderPanels(); return; }
+  input.setCustomValidity('');
+  let value = input.type === 'checkbox' ? input.checked : input.type === 'number' ? input.value === '' ? '' : Number(input.value) : input.value;
+  if (['annotation','annotation-selection'].includes(edit) && key === 'hidden') {
+    setTextHidden(edit === 'annotation' ? [id] : selectedKeys(), value); changed(); return;
+  }
+  if (input.type === 'number') {
+    const nullable = ['node','ts','ref'].includes(edit) && ['e','gcorr','relative'].includes(key);
+    const optional = nullable || edit === 'style' && ['yMin', 'yMax', 'plotWidth', 'plotHeight', 'legendSize', 'legendLineWidth'].includes(key);
+    if ((!optional && value === '') || (value !== '' && !Number.isFinite(value))) return;
+    if (!input.checkValidity()) return;
+    if (nullable && value === '') value = null;
+  }
+  if (edit === 'term') {
+    const n = energyTarget(input.dataset.owner, id, sid); n.terms[Number(input.dataset.index)][key] = value; delete n.autoIssue;
+    changed(input.tagName === 'SELECT');
+    const raw = $('inspector-content').querySelector('[data-field="terms"]'); if (raw) raw.value = C.termsText(n.terms);
+    return;
+  }
+  let target;
+  if (edit === 'project') target = project;
+  if (edit === 'style' || edit === 'palette') target = project.style;
+  if (edit === 'system') target = sys(id);
+  if (edit === 'node') target = state(sys(sid), id);
+  if (edit === 'edge') target = link(sys(sid), id);
+  if (edit === 'ts') target = link(sys(sid), id)?.ts;
+  if (['ref', 'ref-id', 'ref-name'].includes(edit)) target = project.refs.find(r => r.id === id);
+  if (edit === 'annotation') { project.annotations[id] ||= {}; target = project.annotations[id]; }
+  if (!target) return;
+  if (key === 'terms') {
+    const parsed = C.parseTerms(value, project.refs); $('terms-error').textContent = parsed.error;
+    if (parsed.error) { input.setCustomValidity(parsed.error); return; } value = parsed.terms; delete target.autoIssue;
+  }
+  if (edit === 'ref-id' || (edit === 'ref-name' && C.linkedRef(target))) {
+    const nextId = edit === 'ref-id' ? value : C.refId(value), error = C.renameRef(project, target, nextId);
+    if (error) { input.setCustomValidity(error + ' 需要自由显示名称时，请取消同步。'); if (isChange) input.reportValidity(); return; }
+    if (edit === 'ref-id' && C.linkedRef(target)) target.name = value;
+  }
+  if (edit === 'ref' && key === 'syncName' && value && C.refId(target.name) !== target.id) target.name = target.id;
+  if (edit === 'edge' && ['from', 'to'].includes(key) && target[key === 'from' ? 'to' : 'from'] === value) { toast('起点和终点需要是不同状态'); renderPanels(); return; }
+  if (edit === 'project' && key === 'inputMode' && value === 'relative' && project.inputMode === 'raw') {
+    project.systems.forEach(s => [...s.nodes, ...s.edges.filter(e => e.ts).map(e => e.ts)].forEach(n => n.relative = Number.isFinite(C.energy(project,s,n).value) ? Number(C.energy(project,s,n).value.toFixed(10)) : null));
+    toast('已将当前相对能填入直接输入模式，原始数据仍保留');
+  }
+  if (edit === 'style' && key === 'unit') { const ratio = C.factor[value] / C.factor[project.style.unit]; for (const k of ['yMin', 'yMax']) if (project.style[k] !== '') project.style[k] *= ratio; }
+  if (edit === 'style' && key === 'decimals') value = Math.round(value);
+  if (edit === 'style' && ['yMin', 'yMax'].includes(key) && value !== '') { const other = project.style[key === 'yMin' ? 'yMax' : 'yMin']; if (other !== '' && (key === 'yMin' ? value >= other : value <= other)) { input.setCustomValidity('纵轴上限应大于下限'); return; } }
+  if (edit === 'node' && ['stage','x'].includes(key)) C.shiftBranch(sys(sid),id,value-target[key],key);
+  if (edit === 'edge' && ['from','to'].includes(key)) detachBranchEdge(sys(sid),target);
+  target[key] = value;
+  if (edit === 'system' && key === 'color') C.setSystemColor(project, target, value);
+  if (edit === 'system' && key === 'name') C.setSystemName(project, target, value);
+  if (edit === 'annotation' && id.startsWith('legend:') && key === 'text') C.setSystemName(project, sys(id.slice(7)), value);
+  if (edit === 'node' && key === 'stage') C.syncTransitionStages(sys(sid));
+  if (edit === 'edge' && ['from','to'].includes(key)) target.auto = false;
+  if (edit === 'node' && key === 'showLabel') C.setLabelVisible(project,target,value);
+  if (edit === 'annotation' && id.startsWith('node:') && key === 'text') {
+    C.setLabelVisible(project,state(sys(sid),id.slice(5)),Boolean(value.trim()));
+  }
+  if (edit==='annotation' && key==='color') delete target.colorSystem;
+  if (edit==='system' && key==='termOrigin') C.inferSystemTerms(target,project.refs);
+  if (edit === 'ref-id' || edit === 'ref-name') syncRefFields(target, id, input);
+  document.querySelectorAll('[data-edit]').forEach(el => { if (el !== input && el.dataset.edit === edit && el.dataset.id === id && el.dataset.field === key && !['terms'].includes(key)) { if (el.type === 'checkbox') el.checked = value; else el.value = value ?? ''; } });
+  if (edit === 'palette') { const palettes = { blue: ['#277da8', '#e48b32', '#8a61b1', '#3d997a', '#d56172'], teal: ['#32877a', '#9371ae', '#d99751', '#6383ad', '#ce718b'], mono: ['#293d49', '#81939d', '#566a73', '#afbbbf'] }; project.systems.forEach((s, i) => s.color = palettes[value][i % palettes[value].length]); }
+  const panels = input.tagName === 'SELECT' || input.type === 'checkbox' || (key === 'terms' && isChange);
+  changed(panels, input.type === 'color' ? colorGroup(input) : '');
+}
+const actions = {
+  'open-cards': () => cards.open(),
+  'reset-legend-position': () => { project.style.legendDx = 0; project.style.legendDy = 0; changed(); },
+  'select-system': id => selectObject('system', id, id),
+  'select-node': id => selectObject('node', id),
+  'fold-system': id => { const s=sys(id); s.collapsed=!s.collapsed; changed(); },
+  'manual-terms': id => { const n=state(sys(),id); delete n.autoIssue; selectObject('node',id); changed(); },
+  'select-edge': id => selectObject('edge', id),
+  'add-system': () => { const s=C.newSystem(project,'体系 '+(project.systems.length+1)); project.systems.push(s); activeSys=s.id; selection={kind:'system',id:s.id,sys:s.id}; changed(); },
+  'copy-system': () => { const source = sys(), s = C.newSystem(project, source.name + ' 副本', source); project.systems.push(s); activeSys = s.id; selectObject('system', s.id, s.id); changed(); },
+  'remove-system': () => { project.systems = project.systems.filter(s => s.id !== activeSys); activeSys = project.systems[0]?.id || ''; selection = null; changed(); toast('体系已移出，可撤销恢复'); },
+  'add-node': () => { const s=sys(), last=realNodes(s).slice().sort((a,b)=>a.stage-b.stage).at(-1), n=C.node('状态 '+(realNodes(s).length+1),Math.max(...s.nodes.map(n=>n.stage))+1); s.nodes.push(n); if (autoConnect) C.connect(s,last.id,n.id,true); selectObject('node',n.id); changed(); },
+  'insert-blank': () => { const s=sys(), before=selection?.kind==='node' && selection.sys===s.id ? selection.id : ''; const n=C.insertBlank(s,before); selectObject('node',n.id); changed(); },
+  'remove-blank': id => { C.removeBlank(sys(),id); selection=null; changed(); },
+  'infer-terms': () => { C.inferSystemTerms(sys(),project.refs); changed(); },
+  'add-branch': id => { const s = sys(); if (!s) return; const selected=state(s,id || (selection?.kind==='node' && selection.sys===s.id ? selection.id : '')), from=selected && !selected.placeholder ? selected : realNodes(s)[0], n = C.branch(from, '分支状态 ' + s.nodes.length); s.nodes.push(n); s.edges.push({...C.edge(from.id,n.id),branchLink:true}); selectObject('node', n.id); changed(); },
+  'set-baseline': id => { sys().baseline = id; changed(); },
+  'remove-node': id => removeState(activeSys,id),
+  'add-edge': id => openConnection(id),
+  'remove-edge': id => removeConnection(activeSys,id),
+  'toggle-ts': id => { const s=sys(), e=link(s,id); e.ts=e.ts ? null : C.node('TS‡',(state(s,e.from).stage+state(s,e.to).stage)/2); changed(); },
+  'add-ref': () => { let number=1; while(project.refs.some(r=>r.id==='M'+number)) number++; project.refs.push({id:'M'+number,name:'M'+number,syncName:true,e:null,gcorr:null}); changed(); },
+  'add-term': () => { const n=selectedEnergy(); n.terms.push({ ref: project.refs[0].id, n: 1 }); delete n.autoIssue; changed(); },
+  'remove-term': index => { const n=selectedEnergy(); n.terms.splice(Number(index), 1); delete n.autoIssue; changed(); },
+  'remove-ref': id => { const users = project.systems.flatMap(s => [...s.nodes, ...s.edges.filter(e => e.ts).map(e => e.ts)]).filter(n => n.terms.some(t => t.ref === id)); if (users.length) { toast(id + ' 仍被 ' + users.length + ' 个状态引用，请先移除对应系数'); return; } project.refs = project.refs.filter(r => r.id !== id); changed(); },
+  'select-owner': () => { const owner=annotationMeta.get(selection.key).opts.owner; selectObject(owner.kind,owner.id,owner.sys); },
+  'annotation-color': color => applySelectedStyle({ color }),
+  'annotation-system-color': id => applySelectedStyle({ colorSystem: id }),
+  'annotation-default-color': () => applySelectedStyle({ color: undefined, colorSystem: undefined }),
+  'reset-text': () => { if (project.annotations[selection.key]) delete project.annotations[selection.key].text; if (selection.key.startsWith('node:')) C.setLabelVisible(project,state(sys(),selection.key.slice(5)),true); changed(); },
+  'reset-annotation': () => { for (const key of selectedKeys()) { const owner = annotationMeta.get(key).opts.owner; delete project.annotations[key]; if (key.startsWith('node:')) C.setLabelVisible(project,state(sys(owner.sys),key.slice(5)),true); } changed(); },
+  'paste': () => { $('paste-error').textContent = ''; $('paste-dialog').showModal(); },
+  'paste-refs': () => { $('ref-paste-error').textContent = ''; $('ref-paste-dialog').showModal(); }
+};
+document.addEventListener('input', event => { if (event.target.matches('[data-edit]')) updateField(event.target); });
+document.addEventListener('change', event => { if (['ref-id', 'ref-name'].includes(event.target.dataset.edit) || event.target.dataset.field === 'terms') updateField(event.target, true); if (event.target.dataset.ui === 'auto-connect') autoConnect = event.target.checked; });
+document.addEventListener('pointerdown', event => {
+  endColorEdit();
+  if (event.target.matches('input[type="color"]')) colorGroup(event.target);
+  if (event.target.closest('[data-format]')) event.preventDefault();
+});
+document.addEventListener('pointerdown', event => { if (canvasEdit && !event.target.closest('#canvas-editor')) finishCanvasText(); }, true);
+document.addEventListener('focusin', event => { if (event.target.matches('input[type="color"]')) colorGroup(event.target); else endColorEdit(); });
+document.addEventListener('dblclick', event => { const name=event.target.closest('[data-rename]'); if (name && !event.target.closest('input,button')) beginNameEdit(name); });
+document.addEventListener('focusout', event => {
+  if (event.target.matches('input[type="color"]')) endColorEdit();
+  if (inlineEdit && inlineEdit.el.contains(event.target)) setTimeout(() => { if (inlineEdit && !inlineEdit.el.contains(document.activeElement)) finishNameEdit(); },0);
+});
+document.addEventListener('click', event => {
+  if (suppressStateClick) { suppressStateClick = false; event.preventDefault(); return; }
+  const format = event.target.closest('[data-format]'); if (format) { applyScript(format.closest('.field').querySelector('input,textarea'), format.dataset.format); return; }
+  const target = event.target.closest('[data-action]');
+  if (target && !event.target.closest('input,select,textarea') && !inlineEdit) { const parent=target.closest('[data-sys]'); if (parent) activeSys=parent.dataset.sys; actions[target.dataset.action]?.(target.dataset.id); }
+  const tabButton = event.target.closest('[data-tab]'); if (tabButton) { tab = tabButton.dataset.tab; renderPanels(); }
+  const inspect = event.target.closest('[data-inspect]'); if (inspect) { inspectTab = inspect.dataset.inspect; renderPanels(); }
+  if (event.target.closest('[data-close]')) event.target.closest('dialog').close();
+});
+function historyStep(direction) {
+  closeStateMenu(); if ($('branch-dialog').open) $('branch-dialog').close();
+  endColorEdit();
+  const saved = C.moveHistory(history, direction); if (saved === null) return;
+  finishCanvasText(false);
+  const owners = selectedKeys().map(key => [key, annotationMeta.get(key)?.opts.owner]), owner = selection?.kind === 'annotation' ? null : selection;
+  project = JSON.parse(saved); inlineEdit = null; cards?.reset();
+  const exists = owner => !owner || Boolean(sys(owner.sys) && (owner.kind === 'system' || owner.kind === 'node' && state(sys(owner.sys),owner.id) || owner.kind === 'edge' && link(sys(owner.sys),owner.id)));
+  if (selection?.kind === 'annotation') { const keys = owners.filter(([,owner]) => exists(owner)).map(([key]) => key); selection = keys.length ? { ...selection, keys, key: keys.at(-1) } : null; }
+  const s = sys(owner?.sys);
+  if (owner && owner.kind !== 'legend' && (!s || owner.kind === 'node' && !state(s, owner.id) || owner.kind === 'edge' && !link(s, owner.id))) selection = null;
+  record(); persist(); renderAll();
+  if (selection?.kind === 'annotation') {
+    selectAnnotations(selectedKeys());
+  }
+}
+$('undo').onclick = () => historyStep(-1);
+$('redo').onclick = () => historyStep(1);
+$('new-project').onclick = () => replaceDialog('新建空白工程', () => loadProject(C.blank()));
+$('confirm-apply').onclick = () => { $('confirm-dialog').close(); confirmAction(); };
+$('confirm-save').onclick = saveProject;
+$('save-project').onclick = saveProject;
+$('restore-cache').onclick = () => replaceDialog('恢复上次编辑',()=>loadProject(C.clone(recovery),true));
+$('dismiss-cache').onclick = () => $('recovery-bar').hidden=true;
+$('finish-edit').onclick = () => { $('finish-message').textContent=dirty ? '当前修改尚未导出，是否保存工程？' : '是否再导出一份工程？'; $('finish-dialog').showModal(); };
+async function finishEditing(save) {
+  if (save && !await saveProject()) return;
+  cacheNow(); recovery=C.clone(project); $('finish-dialog').close();
+  loadProject(C.blank()); $('recovery-bar').hidden=false;
+}
+$('finish-save').onclick = () => finishEditing(true);
+$('finish-cache').onclick = () => finishEditing(false);
+window.addEventListener('beforeunload',event=>{ finishCanvasText(); cacheNow(); if (dirty) { event.preventDefault(); event.returnValue=''; } });
+document.addEventListener('visibilitychange',()=>{ if (document.visibilityState==='hidden') cacheNow(); });
+$('open-project').onclick = () => $('project-file').click();
+$('project-file').onchange = async event => {
+  const file = event.target.files[0]; if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { toast('工程文件超过 5 MB'); event.target.value = ''; return; }
+  try { const p = JSON.parse(await file.text()), error = C.validate(p); if (error) toast(error); else replaceDialog('打开工程：' + file.name, () => { loadProject(p); toast('工程已打开'); }); } catch { toast('无法解析 JSON 工程文件'); } event.target.value = '';
+};
+$('paste-apply').onclick = () => {
+  const parsed = C.parsePaste($('paste-data').value); $('paste-error').textContent = parsed.error; if (parsed.error) return;
+  const s = sys(), nodes = parsed.rows.map(row => { const n = C.node(row.label, row.stage, row.e); n.gcorr = row.gcorr; n.correction = row.correction; n.relative = row.e; return n; });
+  const replace = $('paste-mode').value === 'replace';
+  if (!replace) nodes.forEach(n => n.stage += Math.max(...s.nodes.map(n=>n.stage))+1);
+  const previousNode=realNodes(s).slice().sort((a,b)=>a.stage-b.stage).at(-1), hasOrigin=Boolean(s.termOrigin);
+  if (replace) { s.nodes = []; s.edges = []; s.baseline = nodes[0].id; s.termOrigin=''; }
+  let previous = replace ? null : previousNode; for (const n of nodes) { s.nodes.push(n); if (previous) s.edges.push(C.edge(previous.id, n.id,true)); previous = n; }
+  const inferred=project.inputMode==='raw' ? (!replace && hasOrigin ? C.inferTerms(nodes,project.refs,previousNode) : C.inferSystemTerms(s,project.refs)) : {notices:[],missing:[]};
+  selection = null; $('paste-dialog').close(); $('paste-data').value = ''; changed(); toast('已导入 '+nodes.length+' 个状态'+(inferred.missing.length ? ' · 待填小分子能量' : '')+(inferred.notices.length ? ' · 部分名称需检查' : ''));
+};
+$('ref-paste-apply').onclick = () => {
+  const parsed = C.parsePaste($('ref-paste-data').value); $('ref-paste-error').textContent = parsed.error; if (parsed.error) return;
+  const refs = parsed.rows.map(row => ({ id: C.refId(row.label), name: row.label, syncName: true, e: row.e, gcorr: row.gcorr }));
+  if (refs.some(r => !/^[A-Za-z][A-Za-z0-9_-]*$/.test(r.id)) || new Set(refs.map(r => r.id)).size !== refs.length) { $('ref-paste-error').textContent = '小分子 ID 必须以英文字母开头且不重复，例如 H2、NH3、H2O。'; return; }
+  for (const r of refs) { const old = project.refs.find(item => item.id === r.id); if (old) { old.e = r.e; old.gcorr = r.gcorr; } else project.refs.push(r); }
+  $('ref-paste-dialog').close(); $('ref-paste-data').value = ''; changed(); toast('已更新 ' + refs.length + ' 个小分子参考值');
+};
+$('connect-apply').onclick = () => {
+  const result = C.connect(sys(connectionSystem), $('connect-from').value, $('connect-to').value);
+  $('connect-error').textContent = result.error; if (result.error) return;
+  $('connect-dialog').close(); selectObject('edge', result.edge.id, connectionSystem); changed(); toast('两条台阶已连接');
+};
+$('export-open').onclick = () => { finishCanvasText(); $('export-dialog').showModal(); };
+$('export-svg').onclick = exportSvg;
+$('export-png').onclick = exportPng; $('export-csv').onclick = exportCsv;
+$('style-open').onclick = () => { inspectTab = 'style'; openInspector(); renderPanels(); };
+$('inspector-close').onclick = () => { closeInspector(); document.querySelector('.workspace').classList.add('right-closed'); };
+$('focus').onclick = () => { document.body.classList.toggle('focus'); $('focus').textContent = document.body.classList.contains('focus') ? '⛶ 返回' : '⛶'; };
+$('zoom').onchange = () => {
+  finishCanvasText(); const zoom = $('zoom').value === 'fit' ? 1 : Number($('zoom').value) / 100 / drawing.fitScale;
+  view = { zoom, x: project.style.width * drawing.fitScale * (1 - zoom) / 2, y: project.style.height * drawing.fitScale * (1 - zoom) / 2 }; applyZoom();
+};
+$('text-font').onchange = event => { if (event.target.value) applySelectedStyle({ font: event.target.value }); };
+$('text-size').oninput = event => { const size = Number(event.target.value); if (size >= 8 && size <= 80) applySelectedStyle({ size }); };
+$('text-color').oninput = event => applySelectedStyle({ color: event.target.value }, colorGroup(event.target));
+$('text-bold').onclick = () => applySelectedStyle({ bold: !selectedKeys().every(key => annotationMeta.get(key).bold) });
+$('text-reset').onclick = () => applySelectedStyle({ font: undefined, size: undefined, bold: undefined, color: undefined, colorSystem: undefined });
+function moveState(sid, id, targetId, after) {
+  const result = C.reorderNode(sys(sid),id,targetId,after);
+  if (!result.moved) return;
+  selectObject('node',id,sid,'',false); changed();
+  toast(result.reconnected ? '已调整顺序并更新自动连接' : '已调整顺序，保留原连接');
+}
+function removeState(sid,id) {
+  const result = C.removeNode(sys(sid),id,project.annotations); if (result.error) { toast(result.error); return; }
+  selection = null; changed(); toast(result.retained ? '状态已删除，后续分支保留 · Ctrl+Z 撤销' : '状态已删除 · Ctrl+Z 撤销');
+}
+function detachBranchEdge(s,e) { if (e.branchLink) { const child = state(s,e.to); if (child.branchOf === e.from) delete child.branchOf; e.branchLink = false; } }
+function removeConnection(sid,id) { const s = sys(sid), e = link(s,id); if (!e) return; C.preserveTransition(s,e,project.annotations); detachBranchEdge(s,e); s.edges = s.edges.filter(item => item !== e); selection = null; changed(); toast(e.ts ? '连接已删除，过渡态保留为卡片 · Ctrl+Z 撤销' : '连接已删除 · Ctrl+Z 撤销'); }
+function closeStateMenu() { $('state-menu').hidden = true; stateContext = null; }
+function openStateMenu(context,event) {
+  finishStateDrag(false); closeStateMenu(); stateContext = context;
+  const s = sys(context.sid), n = context.kind === 'node' ? state(s,context.id) : null, menu = $('state-menu');
+  menu.querySelector('[data-state-command="branch"]').hidden = !n || n.placeholder;
+  menu.querySelector('[data-state-command="main"]').hidden = !n?.branchOf;
+  menu.querySelector('[data-state-command="delete"]').textContent = n ? '删除状态' : '删除连接';
+  menu.querySelector('[data-state-command="delete"]').disabled = Boolean(n && !n.placeholder && realNodes(s).length === 1);
+  ($('cards-dialog').open ? $('cards-dialog') : event.target.closest('dialog') || document.body).appendChild(menu); menu.hidden = false;
+  menu.style.left = Math.min(event.clientX,window.innerWidth-menu.offsetWidth-8)+'px';
+  menu.style.top = Math.min(event.clientY,window.innerHeight-menu.offsetHeight-8)+'px';
+  menu.querySelector('button:not([hidden]):not(:disabled)').focus({preventScroll:true});
+}
+function branchDialog(sid,id) {
+  const s = sys(sid), n = state(s,id), excluded = new Set(C.branchGroup(s,id).map(n => n.id));
+  const choices = C.orderedNodes(s).filter(n => !n.placeholder && !excluded.has(n.id));
+  if (!choices.length) { toast('没有可选起点，不能选择自己或自己的后续分支'); return; }
+  branchTarget = {sid,id}; $('branch-state').innerHTML = rich(n.label);
+  $('branch-parent').innerHTML = choices.map((item,i) => `<option value="${item.id}" ${item.id === n.branchOf ? 'selected' : ''}>${i+1} · ${esc(C.optionText(item.label))}</option>`).join('');
+  $('branch-error').textContent = ''; $('branch-dialog').showModal();
+}
+$('state-menu').onclick = event => {
+  const action = event.target.closest('[data-state-command]')?.dataset.stateCommand, context = stateContext;
+  if (!action || !context) return; closeStateMenu();
+  if (action === 'delete') { if (context.kind === 'edge') removeConnection(context.sid,context.id); else removeState(context.sid,context.id); }
+  if (action === 'branch') branchDialog(context.sid,context.id);
+  if (action === 'main') { C.setBranch(sys(context.sid),context.id,''); changed(); toast('已设为主路径状态'); }
+};
+$('branch-apply').onclick = () => {
+  const result = C.setBranch(sys(branchTarget.sid),branchTarget.id,$('branch-parent').value);
+  $('branch-error').textContent = result.error; if (result.error) return;
+  $('branch-dialog').close(); if (result.moved) { changed(); toast('已设为分支，随起点一起移动'); }
+};
+$('data-content').addEventListener('contextmenu',event => {
+  const row = event.target.closest('.state-row'); if (!row || event.target.closest('input,textarea,select')) return;
+  event.preventDefault(); openStateMenu({kind:'node',sid:row.closest('[data-sys]').dataset.sys,id:row.dataset.id},event);
+});
+document.addEventListener('pointerdown',event => { if (stateContext && !event.target.closest('#state-menu')) closeStateMenu(); });
+$('data-content').addEventListener('scroll',closeStateMenu); window.addEventListener('resize',closeStateMenu);
+function markStateDrop() {
+  $('data-content').querySelectorAll('.drop-before,.drop-after').forEach(el => el.classList.remove('drop-before','drop-after'));
+  stateDrag.targetId = '';
+  const hit = document.elementFromPoint(stateDrag.x,stateDrag.y), group = hit?.closest('.system-group');
+  if (group?.dataset.sys !== stateDrag.sid) return;
+  let row = hit.closest('.state-row');
+  if (!row) {
+    const rows = [...group.querySelectorAll('.state-row')];
+    if (stateDrag.y < rows[0].getBoundingClientRect().top) row = rows[0];
+    else if (stateDrag.y > rows.at(-1).getBoundingClientRect().bottom) row = rows.at(-1);
+  }
+  if (!row || !C.sortTarget(sys(stateDrag.sid),stateDrag.id,row.dataset.id)) return;
+  const box = row.getBoundingClientRect();
+  stateDrag.targetId = row.dataset.id; stateDrag.after = stateDrag.y >= box.top + box.height/2;
+  row.classList.add(stateDrag.after ? 'drop-after' : 'drop-before');
+}
+function scrollStateDrag() {
+  if (!stateDrag?.active) return;
+  const panel = $('data-content'), box = panel.getBoundingClientRect();
+  const delta = stateDrag.x < box.left || stateDrag.x > box.right ? 0 : stateDrag.y < box.top+32 ? -10 : stateDrag.y > box.bottom-32 ? 10 : 0;
+  if (delta) { panel.scrollTop += delta; markStateDrop(); }
+  stateDragFrame = requestAnimationFrame(scrollStateDrag);
+}
+function finishStateDrag(commit) {
+  if (!stateDrag) return;
+  const completed = stateDrag; stateDrag = null; cancelAnimationFrame(stateDragFrame);
+  $('data-content').querySelectorAll('.state-dragging,.drop-before,.drop-after').forEach(el => el.classList.remove('state-dragging','drop-before','drop-after'));
+  document.body.classList.remove('sorting-states');
+  if ($('data-content').hasPointerCapture(completed.pointer)) $('data-content').releasePointerCapture(completed.pointer);
+  if (!completed.active) return;
+  suppressStateClick = true; setTimeout(() => suppressStateClick = false,0);
+  if (commit && completed.targetId) moveState(completed.sid,completed.id,completed.targetId,completed.after);
+}
+$('data-content').addEventListener('pointerdown', event => {
+  const row = event.target.closest('.state-row');
+  if (!row || event.button !== 0 || inlineEdit || event.target.closest('input,textarea,select,button,label')) return;
+  stateDrag = { id: row.dataset.id, sid: row.closest('[data-sys]').dataset.sys, row, startX: event.clientX, startY: event.clientY, x: event.clientX, y: event.clientY, pointer: event.pointerId, active: false, targetId: '' };
+});
+$('data-content').addEventListener('pointermove', event => {
+  if (!stateDrag || stateDrag.pointer !== event.pointerId) return;
+  stateDrag.x = event.clientX; stateDrag.y = event.clientY;
+  if (!stateDrag.active) {
+    if (Math.hypot(event.clientX-stateDrag.startX,event.clientY-stateDrag.startY) < 5) return;
+    stateDrag.active = true;
+    for (const n of C.branchGroup(sys(stateDrag.sid),stateDrag.id)) $('data-content').querySelector(`.state-row[data-id="${n.id}"]`)?.classList.add('state-dragging');
+    document.body.classList.add('sorting-states');
+    $('data-content').setPointerCapture(event.pointerId); scrollStateDrag();
+  }
+  event.preventDefault(); markStateDrop();
+});
+$('data-content').addEventListener('pointerup', () => finishStateDrag(true));
+$('data-content').addEventListener('pointercancel', () => finishStateDrag(false));
+$('canvas-text-apply').onclick = () => finishCanvasText(); $('canvas-text-cancel').onclick = () => finishCanvasText(false);
+new ResizeObserver(applyZoom).observe($('plot'));
+$('plot-scroll').addEventListener('wheel', event => {
+  if (!event.ctrlKey && !event.metaKey) return;
+  event.preventDefault(); finishCanvasText();
+  const box = $('plot').getBoundingClientRect();
+  view = C.zoomView(view, Math.exp(-event.deltaY * .0015), { x: event.clientX - box.left - drawing.left, y: event.clientY - box.top - drawing.top });
+  $('zoom').value = 'custom'; applyZoom();
+}, { passive: false });
+$('preset').onchange = event => { const presets = { compact: { width: 1040, height: 660, fontSize: 24, deltaSize: 20, titleSize: 27, stepWidth: .60 }, wide: { width: 1280, height: 650, fontSize: 24, deltaSize: 20, titleSize: 28, stepWidth: .64 }, large: { width: 1040, height: 720, fontSize: 29, deltaSize: 24, titleSize: 31, stepWidth: .55 } }; Object.assign(project.style, presets[event.target.value]); changed(); };
+$('auto-layout').onclick = () => { for (const a of Object.values(project.annotations)) { delete a.dx; delete a.dy; } project.systems.forEach(s => s.nodes.forEach(n => { n.x = 0; n.width = 1; })); changed(); toast('已重新自动排版；自定义内容和颜色保留'); };
+function svgPoint(event) { return new DOMPoint(event.clientX, event.clientY).matrixTransform(drawing.svg.getScreenCTM().inverse()); }
+$('plot').addEventListener('pointerdown', event => {
+  if (event.button !== 0) return;
+  $('plot').focus({ preventScroll: true });
+  const ann = event.target.closest('[data-key]'), n = event.target.closest('[data-node]'), e = event.target.closest('[data-edge]'), resize = event.target.closest('[data-plot-resize]'), legend = event.target.closest('[data-legend]');
+  if (resize) {
+    drag = { kind: 'plot-resize', start: svgPoint(event), width: drawing.area.r - drawing.area.l, height: drawing.area.b - drawing.area.t, id: event.pointerId, moved: false };
+  } else if (ann) {
+    const key = ann.dataset.key;
+    if (event.ctrlKey || event.metaKey || event.shiftKey) { selectAnnotations(selectedKeys().includes(key) ? selectedKeys().filter(k => k !== key) : [...selectedKeys(), key]); event.preventDefault(); return; }
+    if (!selectedKeys().includes(key)) selectAnnotations([key]);
+    const offsets = selectedKeys().map(key => { const meta = annotationMeta.get(key), a = project.annotations[key] || {}; return { key, dx: (a.dx || 0) + meta.baseX - meta.x, dy: (a.dy || 0) + meta.baseY - meta.y }; });
+    drag = { kind:'annotation', key, start: svgPoint(event), offsets, moved: false, id: event.pointerId };
+  } else if (legend) {
+    selectObject('legend', '', '', '', false);
+    drag = { kind: 'legend', start: svgPoint(event), x: project.style.legendDx ?? 0, y: project.style.legendDy ?? 0, moved: false, id: event.pointerId };
+  } else if (n) {
+    selectObject('node',n.dataset.node,n.dataset.sys,'',false);
+    drag={kind:'step',node:state(sys(n.dataset.sys),n.dataset.node),sys:n.dataset.sys,start:svgPoint(event),moved:false,id:event.pointerId};
+    drag.x=drag.node.x; drag.family = C.branchGroup(sys(drag.sys),drag.node.id).map(n => ({node:n,x:n.x})); $('plot').classList.add('dragging-step');
+  }
+  else if (e) { selectObject('edge', e.dataset.edge, e.dataset.sys); return; }
+  else { drag = { kind: 'pan', start: { x: event.clientX, y: event.clientY }, view: { ...view }, moved: false, id: event.pointerId }; $('plot').classList.add('panning'); }
+  if (drag.kind !== 'annotation') $('plot').setPointerCapture(event.pointerId);
+  event.preventDefault();
+});
+$('plot').addEventListener('pointermove', event => {
+  if (!drag || drag.id !== event.pointerId) return;
+  if (drag.kind === 'pan') {
+    const dx = event.clientX - drag.start.x, dy = event.clientY - drag.start.y;
+    if (Math.hypot(dx,dy) < 3 && !drag.moved) return;
+    drag.moved = true; view.x = drag.view.x + dx; view.y = drag.view.y + dy; $('zoom').value = 'custom'; applyZoom(); return;
+  }
+  const p = svgPoint(event), dx = p.x - drag.start.x, dy = p.y - drag.start.y;
+  if (!drag.moved && (drag.kind==='step' ? Math.abs(dx) : Math.hypot(dx,dy)) < 3) return;
+  if (drag.kind === 'annotation' && !drag.moved) $('plot').setPointerCapture(event.pointerId);
+  if (drag.kind==='step') {
+    drag.moved=true; for (const item of drag.family) item.node.x=Number((item.x+dx).toFixed(1)); renderPlot(); return;
+  }
+  drag.moved = true;
+  if (drag.kind === 'legend') {
+    project.style.legendDx = Math.round(Math.max(-2400, Math.min(2400, drag.x + dx)));
+    project.style.legendDy = Math.round(Math.max(-2400, Math.min(2400, drag.y + dy)));
+    renderPlot(); return;
+  }
+  if (drag.kind === 'plot-resize') {
+    project.style.plotWidth = Math.round(Math.max(240, Math.min(project.style.width - drawing.area.l - 34, drag.width + dx)));
+    project.style.plotHeight = Math.round(Math.max(160, Math.min(project.style.height - drawing.area.t - (project.note ? 104 : 78), drag.height + dy)));
+    renderPlot(); return;
+  }
+  for (const offset of drag.offsets) {
+    const meta = annotationMeta.get(offset.key), a = project.annotations[offset.key] ||= {};
+    a.dx = Number((offset.dx + dx).toFixed(1)); a.dy = Number((offset.dy + dy).toFixed(1));
+    meta.g.setAttribute('transform', `translate(${meta.x + a.dx} ${meta.y + a.dy}) rotate(${meta.opts.rotate || 0})`);
+  }
+  if (drag.offsets.some(offset => offset.key.startsWith('legend:'))) renderPlot();
+  else renderSelection();
+});
+function finishDrag() {
+  if (!drag) return;
+  const completed=drag; drag=null; $('plot').classList.remove('dragging-step','panning');
+  if (completed.kind === 'pan') { if (!completed.moved) { selection = null; renderPanels(); renderSelection(); } return; }
+  if (completed.moved) changed();
+  if (completed.kind === 'legend') { openInspector(); renderPanels(); return; }
+  else if (completed.kind==='step') selectObject('node',completed.node.id,completed.sys);
+  else if (completed.kind==='annotation') selectAnnotations([completed.key]);
+}
+$('plot').addEventListener('pointerup', finishDrag); $('plot').addEventListener('pointercancel', finishDrag);
+$('plot').addEventListener('dblclick', event => { const ann = event.target.closest('[data-key]'); if (ann) { event.preventDefault(); beginCanvasText(ann.dataset.key); } });
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && stateContext) { event.preventDefault(); closeStateMenu(); return; }
+  if (event.target.closest('#state-menu') && ['ArrowUp','ArrowDown'].includes(event.key)) {
+    event.preventDefault(); const buttons = [...$('state-menu').querySelectorAll('button:not([hidden]):not(:disabled)')], i = buttons.indexOf(document.activeElement); buttons[(i+(event.key === 'ArrowUp' ? buttons.length-1 : 1))%buttons.length].focus(); return;
+  }
+  if (stateDrag?.active && event.key === 'Escape') { event.preventDefault(); finishStateDrag(false); return; }
+  const grip = event.target.closest('[data-reorder]');
+  if (grip && event.altKey && ['ArrowUp','ArrowDown'].includes(event.key)) {
+    event.preventDefault(); const sid = grip.closest('[data-sys]').dataset.sys, source = state(sys(sid),grip.dataset.reorder), nodes = C.orderedNodes(sys(sid)).filter(n => (n.branchOf || '') === (source.branchOf || '')), i = nodes.indexOf(source), next = nodes[i+(event.key === 'ArrowUp' ? -1 : 1)];
+    if (next) { moveState(sid,nodes[i].id,next.id,event.key === 'ArrowDown'); $('data-content').querySelector(`[data-reorder="${nodes[i].id}"]`).focus(); }
+    return;
+  }
+  if (canvasEdit && event.target === $('canvas-text') && (event.key === 'Escape' || event.key === 'Enter' && !event.shiftKey)) { event.preventDefault(); finishCanvasText(event.key !== 'Escape'); $('plot').focus({ preventScroll: true }); return; }
+  if (inlineEdit && event.target.closest('.inline-editor') && ['Enter','Escape'].includes(event.key)) { event.preventDefault(); finishNameEdit(event.key==='Escape'); return; }
+  const editor = event.target.closest('input[type="text"],textarea');
+  if ((event.ctrlKey || event.metaKey) && (event.code === 'Equal' || event.key === '=' || event.key === '+') && editor?.closest('.field')?.querySelector('[data-format]')) { event.preventDefault(); applyScript(editor, event.shiftKey ? 'super' : 'sub'); return; }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); saveProject(); }
+  const textEditor = !event.target.closest('#text-toolbar') && event.target.closest('textarea,input:not([type="color"]):not([type="checkbox"]):not([type="range"]):not([type="button"]),[contenteditable="true"]');
+  if ((event.ctrlKey || event.metaKey) && ['z','y'].includes(event.key.toLowerCase()) && !textEditor) { event.preventDefault(); historyStep(event.key.toLowerCase() === 'y' || event.shiftKey ? 1 : -1); }
+  if (event.key === 'Delete' && !event.defaultPrevented && selection?.kind === 'annotation' && !event.target.closest('input,textarea,select,[contenteditable="true"]') && !document.querySelector('dialog[open]')) {
+    event.preventDefault(); setTextHidden(selectedKeys(), true); openInspector(); inspectTab = 'object'; changed(); return;
+  }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a' && !event.target.closest('input,textarea,select')) { event.preventDefault(); selectAnnotations([...annotationMeta.values()].filter(m => !m.hidden && String(m.shown).trim()).map(m => m.key)); }
+  if (event.key === 'Escape') { finishCanvasText(false); selection = null; renderSelection(); closeInspector(); }
+  if (selection?.kind === 'legend' && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key) && !event.target.closest('input,textarea,select')) {
+    event.preventDefault(); const amount = event.shiftKey ? 10 : 1;
+    project.style.legendDx = Math.max(-2400, Math.min(2400, (project.style.legendDx ?? 0) + (event.key === 'ArrowLeft' ? -amount : event.key === 'ArrowRight' ? amount : 0)));
+    project.style.legendDy = Math.max(-2400, Math.min(2400, (project.style.legendDy ?? 0) + (event.key === 'ArrowUp' ? -amount : event.key === 'ArrowDown' ? amount : 0)));
+    changed();
+  }
+  if (selection?.kind === 'annotation' && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key) && !event.target.closest('input,textarea,select')) {
+    event.preventDefault(); const amount = event.shiftKey ? 10 : 1;
+    for (const key of selectedKeys()) { const a = project.annotations[key] ||= {}, meta = annotationMeta.get(key); a.dx = (a.dx || 0) + meta.baseX - meta.x + (event.key === 'ArrowLeft' ? -amount : event.key === 'ArrowRight' ? amount : 0); a.dy = (a.dy || 0) + meta.baseY - meta.y + (event.key === 'ArrowUp' ? -amount : event.key === 'ArrowDown' ? amount : 0); }
+    changed();
+  }
+});
+function resizePane(side,value) {
+  const workspace=document.querySelector('.workspace'), other=side==='left' ? $('inspector') : document.querySelector('.data-panel');
+  const max=Math.max(240,window.innerWidth-other.getBoundingClientRect().width-330);
+  const width=Math.round(Math.max(240,Math.min(Math.min(560,max),value)));
+  workspace.style.setProperty('--'+side+'-width',width+'px');
+  $(side+'-resize').setAttribute('aria-valuenow',width);
+}
+document.querySelectorAll('.resize-handle').forEach(handle=>{
+  handle.addEventListener('pointerdown',event=>{
+    if (event.button!==0) return;
+    const side=handle.dataset.side, pane=side==='left' ? document.querySelector('.data-panel') : $('inspector');
+    paneDrag={side,start:event.clientX,width:pane.getBoundingClientRect().width,id:event.pointerId};
+    handle.setPointerCapture(event.pointerId); document.body.classList.add('resizing'); event.preventDefault();
+  });
+  handle.addEventListener('pointermove',event=>{ if (paneDrag?.id===event.pointerId) resizePane(paneDrag.side,paneDrag.width+(event.clientX-paneDrag.start)*(paneDrag.side==='left'?1:-1)); });
+  const end=()=>{ paneDrag=null; document.body.classList.remove('resizing'); };
+  handle.addEventListener('pointerup',end); handle.addEventListener('pointercancel',end);
+  handle.addEventListener('keydown',event=>{
+    if (!['ArrowLeft','ArrowRight'].includes(event.key)) return;
+    event.preventDefault(); const side=handle.dataset.side, pane=side==='left' ? document.querySelector('.data-panel') : $('inspector');
+    resizePane(side,pane.getBoundingClientRect().width+(event.key==='ArrowRight'?12:-12)*(side==='left'?1:-1));
+  });
+});
+cards = StepCards({ project:()=>project, esc, rich, changed, toast, context:openStateMenu,
+  edit:(sid,id)=>selectObject('node',id,sid),
+  remove:item=>item.kind==='node' ? removeState(item.sid,item.id) : removeConnection(item.sid,item.id),
+  undo:()=>historyStep(-1), redo:()=>historyStep(1) });
+$('recovery-bar').hidden=!recovery;
+record(); renderAll();
+
+</script>
+</body>
+</html>
